@@ -134,7 +134,6 @@ return FutureBuilder<DocumentSnapshot>(
 
     final data = docSnapshot.data();
 
-    // تحقق إن data مش null وصيغة البيانات صحيحة
     if (data == null || data is! Map<String, dynamic>) {
       return SizedBox(
         width: 160,

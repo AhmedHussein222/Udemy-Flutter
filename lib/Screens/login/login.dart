@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 40),
+                padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 150,
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                     Center(
                       child: Text(
                         'Log in to continue your learning \n journey',
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                     CustomButton(
                       icon: const Icon(Icons.email),
                       text: "Log in with email",
@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
       content: const Text('Login successful!'),
       backgroundColor: Colors.green,
       behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.only(top: 10, left: 20, right: 20),
+      margin: const EdgeInsets.only(top: 1, left: 20, right: 20, bottom: 100),
       duration: const Duration(seconds: 1), 
     );
 
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     ),
                     
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                     Center(
                       child: Text(
                         '_____ Other login options _____',
