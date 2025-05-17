@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/Screens/subcategories/SubCategories.dart';
 import 'package:udemyflutter/customcard/coursesCard.dart';
-import 'package:udemyflutter/customcatgory/custombuttoncategory,dart';
+import 'package:udemyflutter/customcategory/custombutton.dart';
 import 'package:udemyflutter/recommendcourse/rating.dart';
 
 
