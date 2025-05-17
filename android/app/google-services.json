@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1075601648196",
+    "project_id": "udemy-3d9ed",
+    "storage_bucket": "udemy-3d9ed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075601648196:android:cab49571504c2f82b5aa11",
+        "android_client_info": {
+          "package_name": "com.example.udemyflutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075601648196-38a8rk5j9uf85msjo3apkt83fnpcb9v1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkNsFwXGaO9QadyK6vJubVJbRbm6iZfxY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075601648196-38a8rk5j9uf85msjo3apkt83fnpcb9v1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
