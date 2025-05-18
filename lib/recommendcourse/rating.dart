@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:udemyflutter/customcard/coursesCard.dart';  // أكيد عندك الكارد ده
+import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
+import 'package:udemyflutter/customcard/coursesCard.dart'; 
 
 class TopRatedCourses extends StatelessWidget {
   const TopRatedCourses({super.key});
@@ -24,8 +25,8 @@ class TopRatedCourses extends StatelessWidget {
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Courses')
-                .where('rating.rate', isGreaterThan: 4.5) // فلتر على التقييم
-                .orderBy('rating.rate', descending: true) // ترتيب تنازلي
+                .where('rating.rate', isGreaterThan: 4.5) 
+                .orderBy('rating.rate', descending: true) 
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -71,10 +72,10 @@ class TopRatedCourses extends StatelessWidget {
 
                       return GestureDetector(
                         onTap: () {
-                          // افتحي تفاصيل الكورس عند الضغط، لو عندك صفحة تفاصيل
-                          // Navigator.push(context, MaterialPageRoute(
-                          //   builder: (context) => CourseDetailsScreen(courseData: course),
-                          // ));
+                       
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => CourseDetailsScreen(courseData: course),
+                          ));
                         },
                         child: HoverCourseCard(
                           imageUrl: course['thumbnail'],

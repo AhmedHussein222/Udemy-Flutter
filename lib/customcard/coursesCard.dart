@@ -34,7 +34,7 @@ class _HoverCourseCardState extends State<HoverCourseCard> {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         width: 200,
-        height: 250,
+        // height: 250,
         margin: const EdgeInsets.only(right: 12),
         transform: isHovering
             ? (Matrix4.identity()..scale(1.05)) 
