@@ -224,7 +224,7 @@ class _AccountScreenState extends State<AccountScreen> {
   radius: 50,
   backgroundImage: _imageUrlController.text.isNotEmpty
       ? NetworkImage(_imageUrlController.text)
-      : const AssetImage('assets/Images/billboard-mobile-v3.webp') as ImageProvider,
+      : const AssetImage('assets/default_avatar.png') as ImageProvider,
   onBackgroundImageError: (_, __) {
     print('Image load error');
   },
@@ -561,7 +561,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 radius: 50,
                 backgroundImage: _imageUrlController.text.isNotEmpty
                     ? NetworkImage(_imageUrlController.text)
-                    : const AssetImage('assets/Images/billboard-mobile-v3.webp')
+                    : const AssetImage('assets/default_avatar.png')
                         as ImageProvider,
                 onBackgroundImageError: (_, __) {
                   print('Image load error');
@@ -647,7 +647,7 @@ class _AccountScreenState extends State<AccountScreen> {
             currentAccountPicture: CircleAvatar(
               backgroundImage: _imageUrlController.text.isNotEmpty
                   ? NetworkImage(_imageUrlController.text)
-                  : const AssetImage('assets/Images/billboard-mobile-v3.webp')
+                  : const AssetImage('assets/default_avatar.png')
                       as ImageProvider,
               onBackgroundImageError: (_, __) {
                 print('Image load error');
