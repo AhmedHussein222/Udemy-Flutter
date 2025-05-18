@@ -1,12 +1,13 @@
+
 import 'package:flutter/material.dart';
 
-class HoverCourseCard extends StatefulWidget {
+class HoverCourseCard extends StatelessWidget {
   final String imageUrl;
   final String title;
   final String instructor;
-  final num price;
-  final num discount;
-  final num rating;
+  final double price;
+  final double discount;
+  final double rating;
 
   const HoverCourseCard({
     super.key,
@@ -19,105 +20,103 @@ class HoverCourseCard extends StatefulWidget {
   });
 
   @override
-  _HoverCourseCardState createState() => _HoverCourseCardState();
-}
-
-class _HoverCourseCardState extends State<HoverCourseCard> {
-  bool isHovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => isHovering = true),
-      onExit: (_) => setState(() => isHovering = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        width: 200,
-        // height: 250,
-        margin: const EdgeInsets.only(right: 12),
-        transform: isHovering
-            ? (Matrix4.identity()..scale(1.05)) 
-            : Matrix4.identity(),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: isHovering
-              ? [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.4),
-                    blurRadius: 15,
-                    spreadRadius: 3,
-                    offset: const Offset(0, 0),
-                  )
-                ]
-              : [],
-          border: Border.all(color: Colors.white.withOpacity(0.5), width: 0.5),
-          color: Colors.black,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Image.network(
-                widget.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 120,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Colors.white),
+    return Card(
+      color: Colors.grey[900],
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: SizedBox(
+        width: 200, 
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      width: double.infinity,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/images/default_course.jpg',
+                        width: double.infinity,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/images/default_course.jpg',
+                      width: double.infinity,
+                      height: 120,
+                      fit: BoxFit.cover,
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      widget.instructor,
-                      style: TextStyle(color: Colors.grey[400]),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Text(
-                          "${widget.price}",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    instructor,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[400],
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "${widget.discount}",
-                          style:  TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                            decoration: TextDecoration.combine(
-                                [TextDecoration.lineThrough, TextDecoration.underline]),
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    price == 0 ? 'Free' : '\$${price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
                     ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 18),
-                        const SizedBox(width: 4),
-                        Text(widget.rating.toString(),
-                            style: const TextStyle(color: Colors.white)),
-                      ],
+                  ),
+                  if (discount > 0)
+                    Text(
+                      ' ${discount.toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[400],
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

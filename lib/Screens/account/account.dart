@@ -220,18 +220,18 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               Center(
                 child: CircleAvatar(
-                  radius: 70,
-                  backgroundImage: _imageUrlController.text.isNotEmpty
-                      ? NetworkImage(_imageUrlController.text)
-                      : const AssetImage('assets/default_avatar.png')
-                          as ImageProvider,
-                  onBackgroundImageError: (_, __) {
-                    print('Image load error');
-                  },
-                  child: _imageUrlController.text.isNotEmpty
-                      ? null
-                      : const Icon(Icons.person, size: 70, color: Colors.grey),
-                ),
+  key: ValueKey(_imageUrlController.text), 
+  radius: 50,
+  backgroundImage: _imageUrlController.text.isNotEmpty
+      ? NetworkImage(_imageUrlController.text)
+      : const AssetImage('assets/Images/billboard-mobile-v3.webp') as ImageProvider,
+  onBackgroundImageError: (_, __) {
+    print('Image load error');
+  },
+  child: _imageUrlController.text.isNotEmpty
+      ? null
+      : const Icon(Icons.person, size: 50, color: Colors.grey),
+),
               ),
               const SizedBox(height: 16),
               Center(
@@ -561,7 +561,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 radius: 50,
                 backgroundImage: _imageUrlController.text.isNotEmpty
                     ? NetworkImage(_imageUrlController.text)
-                    : const AssetImage('assets/default_avatar.png')
+                    : const AssetImage('assets/Images/billboard-mobile-v3.webp')
                         as ImageProvider,
                 onBackgroundImageError: (_, __) {
                   print('Image load error');
@@ -647,7 +647,7 @@ class _AccountScreenState extends State<AccountScreen> {
             currentAccountPicture: CircleAvatar(
               backgroundImage: _imageUrlController.text.isNotEmpty
                   ? NetworkImage(_imageUrlController.text)
-                  : const AssetImage('assets/default_avatar.png')
+                  : const AssetImage('assets/Images/billboard-mobile-v3.webp')
                       as ImageProvider,
               onBackgroundImageError: (_, __) {
                 print('Image load error');
