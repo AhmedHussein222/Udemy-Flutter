@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> pages = [
     FeatureScreen(),
     SubCategoryPage(),
-    MylearningScreen(),
+    // MylearningScreen(),
     WishlistScreen(),
     AccountScreen(),
   ];
