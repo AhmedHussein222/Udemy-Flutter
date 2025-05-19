@@ -17,17 +17,20 @@ class _AccountScreenState extends State<AccountScreen> {
   String selectedSection = 'home';
   bool isLoading = true;
 
-  // Form controllers
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _bioController = TextEditingController();
-  String _selectedGender = 'Male';
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _imageUrlController = TextEditingController();
+  final _facebookController = TextEditingController();
+  final _linkedinController = TextEditingController();
+  final _youtubeController = TextEditingController();
+  final _instagramController = TextEditingController();
 
-  List<String> genderOptions = ['Male', 'Female'];
+  List<String> genderOptions = ['male', 'female'];
+  String _selectedGender = 'male';
 
   @override
   void initState() {
@@ -51,10 +54,15 @@ class _AccountScreenState extends State<AccountScreen> {
         final data = doc.data();
         if (data != null) {
           userData = data;
+          final links = userData?['links'] as Map<String, dynamic>? ?? {};
           setState(() {
             _firstNameController.text = (userData?['first_name'] as String?) ?? '';
             _lastNameController.text = (userData?['last_name'] as String?) ?? '';
             _bioController.text = (userData?['bio'] as String?) ?? '';
+            _facebookController.text = (links['facebook'] as String?) ?? '';
+            _linkedinController.text = (links['linkedin'] as String?) ?? '';
+            _youtubeController.text = (links['youtube'] as String?) ?? '';
+            _instagramController.text = (links['instagram'] as String?) ?? '';
             final gender = userData?['gender'] as String?;
             _selectedGender = gender != null && genderOptions.contains(gender)
                 ? gender
@@ -68,6 +76,10 @@ class _AccountScreenState extends State<AccountScreen> {
             _firstNameController.text = '';
             _lastNameController.text = '';
             _bioController.text = '';
+            _facebookController.text = '';
+            _linkedinController.text = '';
+            _youtubeController.text = '';
+            _instagramController.text = '';
             _selectedGender = genderOptions.first;
             _imageUrlController.text = '';
             isLoading = false;
@@ -79,16 +91,7 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     } catch (e) {
       print('Error fetching user data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error fetching profile: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('Error fetching profile: $e', Colors.red);
       setState(() => isLoading = false);
     }
   }
@@ -101,45 +104,24 @@ class _AccountScreenState extends State<AccountScreen> {
         'last_name': _lastNameController.text.trim(),
         'bio': _bioController.text.trim(),
         'gender': _selectedGender,
+        'links': {
+          'facebook': _facebookController.text.trim(),
+          'linkedin': _linkedinController.text.trim(),
+          'youtube': _youtubeController.text.trim(),
+          'instagram': _instagramController.text.trim(),
+        },
       }, SetOptions(merge: true));
       await _fetchUserData();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile saved successfully.'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-        ),
-      );
+      _showSnackBar('Profile saved successfully.', Colors.green);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving profile: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-        ),
-      );
+      _showSnackBar('Error saving profile: $e', Colors.red);
     }
     setState(() => isLoading = false);
   }
 
   Future<void> _changePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('New password and confirm password do not match.'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-        ),
-      );
+      _showSnackBar('New password and confirm password do not match.', Colors.red);
       return;
     }
 
@@ -151,61 +133,32 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       await user!.reauthenticateWithCredential(cred);
       await user!.updatePassword(_newPasswordController.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password updated successfully.'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-        ),
-      );
+      _showSnackBar('Password updated successfully.', Colors.green);
       _currentPasswordController.clear();
       _newPasswordController.clear();
       _confirmPasswordController.clear();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating password: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('Error updating password: $e', Colors.red);
     }
   }
 
   Future<void> _saveImageProfile() async {
     setState(() => isLoading = true);
+    final imageUrl = _imageUrlController.text.trim();
+    if (imageUrl.isEmpty || !Uri.parse(imageUrl).isAbsolute) {
+      _showSnackBar('Please enter a valid image URL.', Colors.red);
+      setState(() => isLoading = false);
+      return;
+    }
+
     try {
       await FirebaseFirestore.instance.collection('Users').doc(user!.uid).set({
-        'profile_picture': _imageUrlController.text.trim(),
+        'profile_picture': imageUrl,
       }, SetOptions(merge: true));
       await _fetchUserData();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile image updated.'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-        ),
-      );
+      _showSnackBar('Profile image updated.', Colors.green);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating image: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('Error updating image: $e', Colors.red);
     }
     setState(() => isLoading = false);
   }
@@ -237,17 +190,21 @@ class _AccountScreenState extends State<AccountScreen> {
         MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error deleting account: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-          elevation: 6,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+      _showSnackBar('Error deleting account: $e', Colors.red);
     }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
   }
 
   Widget buildSectionContent() {
@@ -263,15 +220,18 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               Center(
                 child: CircleAvatar(
-                  radius: 70,
-                  backgroundImage: (_imageUrlController.text.isNotEmpty)
-                      ? NetworkImage(_imageUrlController.text)
-                      : const AssetImage('assets/default_avatar.png')
-                          as ImageProvider,
-                  onBackgroundImageError: (error, stackTrace) {
-                    print('Image load error: $error');
-                  },
-                ),
+  key: ValueKey(_imageUrlController.text), 
+  radius: 50,
+  backgroundImage: _imageUrlController.text.isNotEmpty
+      ? NetworkImage(_imageUrlController.text)
+      : const AssetImage('assets/default_avatar.png') as ImageProvider,
+  onBackgroundImageError: (_, __) {
+    print('Image load error');
+  },
+  child: _imageUrlController.text.isNotEmpty
+      ? null
+      : const Icon(Icons.person, size: 50, color: Colors.grey),
+),
               ),
               const SizedBox(height: 16),
               Center(
@@ -299,7 +259,7 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Gender: $_selectedGender',
+                'Gender: ${_selectedGender[0].toUpperCase()}${_selectedGender.substring(1)}',
                 style: const TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 8),
@@ -308,9 +268,53 @@ class _AccountScreenState extends State<AccountScreen> {
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                _bioController.text,
+                _bioController.text.isEmpty ? 'No bio provided' : _bioController.text,
                 style: const TextStyle(color: Colors.white70),
               ),
+              const SizedBox(height: 8),
+              if (_facebookController.text.isNotEmpty) ...[
+                const Text(
+                  'Facebook:',
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  _facebookController.text,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (_linkedinController.text.isNotEmpty) ...[
+                const Text(
+                  'LinkedIn:',
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  _linkedinController.text,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (_youtubeController.text.isNotEmpty) ...[
+                const Text(
+                  'YouTube:',
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  _youtubeController.text,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (_instagramController.text.isNotEmpty) ...[
+                const Text(
+                  'Instagram:',
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  _instagramController.text,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+              ],
             ],
           ),
         );
@@ -368,7 +372,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 items: genderOptions
                     .map((g) => DropdownMenuItem(
                           value: g,
-                          child: Text(g, style: const TextStyle(color: Colors.white)),
+                          child: Text(g[0].toUpperCase() + g.substring(1),
+                              style: const TextStyle(color: Colors.white)),
                         ))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedGender = v!),
@@ -389,12 +394,80 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _facebookController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                  labelText: 'Facebook URL',
+                  labelStyle: TextStyle(color: Colors.grey[400]),
+                  prefixIcon: const Icon(Icons.facebook, color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _linkedinController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                  labelText: 'LinkedIn URL',
+                  labelStyle: TextStyle(color: Colors.grey[400]),
+                  prefixIcon: const Icon(Icons.link, color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _youtubeController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                  labelText: 'YouTube URL',
+                  labelStyle: TextStyle(color: Colors.grey[400]),
+                  prefixIcon: const Icon(Icons.videocam, color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _instagramController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                  labelText: 'Instagram URL',
+                  labelStyle: TextStyle(color: Colors.grey[400]),
+                  prefixIcon: const Icon(Icons.camera_alt, color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                keyboardType: TextInputType.url,
+              ),
               const SizedBox(height: 16),
               Center(
                 child: ElevatedButton(
                   onPressed: _saveProfile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: const Color.fromARGB(255, 137, 52, 216),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -465,7 +538,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: ElevatedButton(
                   onPressed: _changePassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: const Color.fromARGB(255, 137, 52, 216),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -486,13 +559,16 @@ class _AccountScreenState extends State<AccountScreen> {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundImage: (_imageUrlController.text.isNotEmpty)
+                backgroundImage: _imageUrlController.text.isNotEmpty
                     ? NetworkImage(_imageUrlController.text)
                     : const AssetImage('assets/default_avatar.png')
                         as ImageProvider,
-                onBackgroundImageError: (error, stackTrace) {
-                  print('Image load error: $error');
+                onBackgroundImageError: (_, __) {
+                  print('Image load error');
                 },
+                child: _imageUrlController.text.isNotEmpty
+                    ? null
+                    : const Icon(Icons.person, size: 50, color: Colors.grey),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -514,7 +590,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: ElevatedButton(
                   onPressed: _saveImageProfile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: const Color.fromARGB(255, 137, 52, 216),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -529,18 +605,29 @@ class _AccountScreenState extends State<AccountScreen> {
         );
 
       case 'delete_account':
-        return Center(
-          child: ElevatedButton(
-            onPressed: _deleteAccount,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Permanently delete your account?',
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: const Text('Delete Account', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _deleteAccount,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: const Text('Delete Account', style: TextStyle(fontSize: 16)),
+              ),
+            ],
           ),
         );
 
@@ -558,13 +645,16 @@ class _AccountScreenState extends State<AccountScreen> {
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: Colors.black),
             currentAccountPicture: CircleAvatar(
-              backgroundImage: (_imageUrlController.text.isNotEmpty)
+              backgroundImage: _imageUrlController.text.isNotEmpty
                   ? NetworkImage(_imageUrlController.text)
                   : const AssetImage('assets/default_avatar.png')
                       as ImageProvider,
-              onBackgroundImageError: (error, stackTrace) {
-                print('Image load error: $error');
+              onBackgroundImageError: (_, __) {
+                print('Image load error');
               },
+              child: _imageUrlController.text.isNotEmpty
+                  ? null
+                  : const Icon(Icons.person, size: 50, color: Colors.grey),
             ),
             accountName: Text(
               '${_firstNameController.text} ${_lastNameController.text}',
@@ -622,7 +712,6 @@ class _AccountScreenState extends State<AccountScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         automaticallyImplyLeading: true,
-        // title: const Text('Account', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: buildSectionContent(),
@@ -638,6 +727,10 @@ class _AccountScreenState extends State<AccountScreen> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     _imageUrlController.dispose();
+    _facebookController.dispose();
+    _linkedinController.dispose();
+    _youtubeController.dispose();
+    _instagramController.dispose();
     super.dispose();
   }
 }

@@ -24,6 +24,19 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     instructorFuture = FirebaseFirestore.instance.collection('Users').doc(instructorId).get();
   }
 
+  // Widget to display star rating
+  Widget _buildStarRating(double rating) {
+    return Row(
+      children: List.generate(5, (index) {
+        return Icon(
+          index < rating.floor() ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 18,
+        );
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     List<dynamic> requirements = widget.courseData['requirements'] ?? [];
@@ -51,50 +64,60 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Stack(
-  children: [
-    Image.network(
-      widget.courseData['thumbnail'],
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: 200,
-    ),
-    Positioned(
-      top: 2,
-      left: 1,
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-    ),
-  ],
-),
-
+                Stack(
+                  children: [
+                    Image.network(
+                      widget.courseData['thumbnail'] ?? 'https://via.placeholder.com/150',
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 200,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/images/default_course.jpg',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 200,
+                      ),
+                    ),
+                    Positioned(
+                      top: 2,
+                      left: 1,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.courseData['title'],
+                  widget.courseData['title'] ?? 'No Title',
                   style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.courseData['description'],
+                  widget.courseData['description'] ?? 'No Description',
                   style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  'Rating: ${widget.courseData['rating']['rate']}',
-                  style: const TextStyle(fontSize: 16, color: Colors.white70),
+                Row(
+                  children: [
+                    _buildStarRating(widget.courseData['rating']['rate']?.toDouble() ?? 0.0),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${widget.courseData['rating']['rate']?.toStringAsFixed(1) ?? '0.0'} (${widget.courseData['rating']['count'] ?? 0} reviews)',
+                      style: const TextStyle(fontSize: 16, color: Colors.white70),
+                    ),
+                  ],
                 ),
-               
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     const Icon(Icons.language, color: Colors.white70, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      ' ${widget.courseData['language']}',
+                      widget.courseData['language'] ?? 'Unknown',
                       style: const TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                   ],
@@ -103,18 +126,21 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 Row(
                   children: [
                     Text(
-                      '${widget.courseData['price']}',
+                      widget.courseData['price'] == 0
+                          ? 'Free'
+                          : '\$${widget.courseData['price']?.toString() ?? '0'}',
                       style: const TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      '${widget.courseData['discount']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white54,
-                        decoration: TextDecoration.lineThrough,
+                    if (widget.courseData['discount'] != null && widget.courseData['discount'] > 0)
+                      Text(
+                        '\$${widget.courseData['discount'].toString()}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white54,
+                          decoration: TextDecoration.lineThrough,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -176,7 +202,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                         ),
                       ],
                     )),
-
                 const SizedBox(height: 20),
 
                 /// Requirements
@@ -198,8 +223,9 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                       ],
                     )),
 
+                const SizedBox(height: 20),
 
-                     const SizedBox(height: 10),
+                /// Instructor
                 const Text(
                   "Instructor",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
@@ -209,7 +235,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   children: [
                     CircleAvatar(
                       radius: 35,
-                      backgroundImage: NetworkImage(instructor['profile_picture']),
+                      backgroundImage: NetworkImage(instructor['profile_picture'] ?? 'https://i.pinimg.com/736x/1f/79/73/1f7973fe4680410e3d683040b6da133f.jpg'),
+                      backgroundColor: Colors.grey[800],
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -219,18 +246,129 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                           Text(
                             "${instructor['first_name']} ${instructor['last_name']}",
                             style: const TextStyle(
-                                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            instructor['bio'] ?? '',
+                            instructor['bio'] ?? 'No bio available',
                             style: const TextStyle(color: Colors.white70, fontSize: 14),
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
+
+                const SizedBox(height: 20),
+
+               
+                const Text(
+                  "Reviews",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('Reviews')
+                      .where('course_id', isEqualTo: widget.courseData['id'])
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return const Text(
+                        'Error loading reviews',
+                        style: TextStyle(color: Colors.white70),
+                      );
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Text(
+                        'No reviews available',
+                        style: TextStyle(color: Colors.white70),
+                      );
+                    }
+
+                    final reviews = snapshot.data!.docs;
+
+                    return Column(
+                      children: reviews.map((reviewDoc) {
+                        final review = reviewDoc.data() as Map<String, dynamic>;
+                        final userId = review['user_id'];
+
+                        return FutureBuilder<DocumentSnapshot>(
+                          future: FirebaseFirestore.instance.collection('Users').doc(userId).get(),
+                          builder: (context, userSnapshot) {
+                            if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                              return const SizedBox();
+                            }
+
+                            final user = userSnapshot.data!.data() as Map<String, dynamic>;
+
+                            return Card(
+                              color: Colors.grey[900],
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundImage: NetworkImage(
+                                            user['profile_picture'] ?? 'https://i.pinimg.com/736x/1f/79/73/1f7973fe4680410e3d683040b6da133f.jpg',
+                                          ),
+                                          backgroundColor: Colors.grey[800],
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            "${user['first_name']} ${user['last_name']}",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        _buildStarRating(review['rating']?.toDouble() ?? 0.0),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${review['rating']?.toStringAsFixed(1) ?? '0.0'}',
+                                          style: const TextStyle(color: Colors.white70, fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      review['comment'] ?? 'No comment',
+                                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
               ],
             ),
           );
