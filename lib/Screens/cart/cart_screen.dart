@@ -62,7 +62,39 @@ class CartScreen extends StatelessWidget {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("Your cart is empty"));
+           return Center(
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const Text(
+        "Your Cart is empty!",
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 20),
+      ElevatedButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/feature'); // أو استخدمي push لو عايزة
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.purple,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: const Text(
+          'Go Shopping',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ],
+  ),
+);
+
           }
 
           final docs = snapshot.data!.docs;
