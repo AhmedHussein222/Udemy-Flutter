@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
+import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 
 class CourseDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> courseData;
@@ -22,6 +24,18 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     super.initState();
     String instructorId = widget.courseData['instructor_id'];
     instructorFuture = FirebaseFirestore.instance.collection('Users').doc(instructorId).get();
+  }
+
+  Widget _buildStarRating(double rating) {
+    return Row(
+      children: List.generate(5, (index) {
+        return Icon(
+          index < rating.floor() ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 18,
+        );
+      }),
+    );
   }
 
   @override
@@ -51,50 +65,61 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Stack(
-  children: [
-    Image.network(
-      widget.courseData['thumbnail'],
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: 200,
-    ),
-    Positioned(
-      top: 2,
-      left: 1,
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-    ),
-  ],
-),
-
+                Stack(
+                  children: [
+                    Image.network(
+                      widget.courseData['thumbnail'] ??
+                          'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 200,
+                      errorBuilder: (context, error, stackTrace) => Image.network(
+                        'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 200,
+                      ),
+                    ),
+                    Positioned(
+                      top: 2,
+                      left: 1,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.courseData['title'],
+                  widget.courseData['title'] ?? 'No Title',
                   style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.courseData['description'],
+                  widget.courseData['description'] ?? 'No Description',
                   style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  'Rating: ${widget.courseData['rating']['rate']}',
-                  style: const TextStyle(fontSize: 16, color: Colors.white70),
+                Row(
+                  children: [
+                    _buildStarRating(widget.courseData['rating']['rate']?.toDouble() ?? 0.0),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${widget.courseData['rating']['rate']?.toStringAsFixed(1) ?? '0.0'} (${widget.courseData['rating']['count'] ?? 0} reviews)',
+                      style: const TextStyle(fontSize: 16, color: Colors.white70),
+                    ),
+                  ],
                 ),
-               
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     const Icon(Icons.language, color: Colors.white70, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      ' ${widget.courseData['language']}',
+                      widget.courseData['language'] ?? 'Unknown',
                       style: const TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                   ],
@@ -103,23 +128,24 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 Row(
                   children: [
                     Text(
-                      '${widget.courseData['price']}',
+                      widget.courseData['price'] == 0
+                          ? 'Free'
+                          : '\$${widget.courseData['price']?.toString() ?? '0'}',
                       style: const TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      '${widget.courseData['discount']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white54,
-                        decoration: TextDecoration.lineThrough,
+                    if (widget.courseData['discount'] != null && widget.courseData['discount'] > 0)
+                      Text(
+                        '\$${widget.courseData['discount'].toString()}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white54,
+                          decoration: TextDecoration.lineThrough,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                /// Buttons
                 CustomButton(
                   text: "Buy Now",
                   color: Colors.purple,
@@ -144,7 +170,60 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          try {
+                            final course = widget.courseData;
+                            final courseId = course['id'].toString();
+
+                            final user = FirebaseAuth.instance.currentUser;
+                            if (user == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please login first')),
+                              );
+                              return;
+                            }
+
+                            final userId = user.uid;
+
+                            final cartItemRef = FirebaseFirestore.instance
+                                .collection('Cart')
+                                .doc(userId)
+                                .collection('Items')
+                                .doc(courseId);
+
+                            final existingDoc = await cartItemRef.get();
+
+                            if (!existingDoc.exists) {
+                              await cartItemRef.set({
+                                'course_id': courseId,
+                                'title': course['title'],
+                                'price': course['price'],
+                                'thumbnail': course['thumbnail'],
+                                'added_at': FieldValue.serverTimestamp(),
+                              });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Added to cart')),
+                              );
+
+                              // الانتقال لصفحة الـ Cart
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const CartScreen()),
+                              );
+
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Course already in cart')),
+                              );
+                            }
+                          } catch (e) {
+                            print('Error adding to cart: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Something went wrong')),
+                            );
+                          }
+                        },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.black,
                           side: const BorderSide(color: Colors.white),
@@ -157,8 +236,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                /// What you'll learn
                 const Text(
                   "What you'll learn",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
@@ -176,10 +253,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                         ),
                       ],
                     )),
-
                 const SizedBox(height: 20),
-
-                /// Requirements
                 const Text(
                   "Requirements",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
@@ -197,9 +271,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                         ),
                       ],
                     )),
-
-
-                     const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 const Text(
                   "Instructor",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
@@ -209,28 +281,37 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   children: [
                     CircleAvatar(
                       radius: 35,
-                      backgroundImage: NetworkImage(instructor['profile_picture']),
+                      backgroundImage: NetworkImage(
+                        instructor['profile_picture'] ??
+                            'https://i.pinimg.com/736x/1f/79/73/1f7973fe4680410e3d683040b6da133f.jpg',
+                      ),
+                      onBackgroundImageError: (exception, stackTrace) {
+                        // ممكن تحط صورة افتراضية هنا لو حابب
+                      },
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${instructor['first_name']} ${instructor['last_name']}",
+                            instructor['name'] ?? 'Instructor',
                             style: const TextStyle(
-                                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                          const SizedBox(height: 4),
                           Text(
                             instructor['bio'] ?? '',
                             style: const TextStyle(color: Colors.white70, fontSize: 14),
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           );
@@ -239,3 +320,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     );
   }
 }
+
+// لاحظ أنك محتاج تستورد أو تعرّف الـ CartScreen
+// import 'package:your_app/cart_screen.dart';

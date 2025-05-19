@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 // import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
+// import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
       ),
       home: SplashScreen()
+      // home: CartScreen()
       // home: MyLearningScreen()
     );
   }

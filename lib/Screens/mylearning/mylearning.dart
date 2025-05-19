@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:udemyflutter/Screens/subcategories/SubCategories.dart';
 
 class MyLearningScreen extends StatefulWidget {
   const MyLearningScreen({super.key});
@@ -10,7 +11,9 @@ class MyLearningScreen extends StatefulWidget {
 
 class _MyLearningScreenState extends State<MyLearningScreen> {
   String selectedTab = "All";
-  List<String> categories = [];
+
+  // بدّلنا النوع علشان يحتوي على name و id
+  List<Map<String, String>> categories = [];
 
   @override
   void initState() {
@@ -23,8 +26,12 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
       QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection('Categories').get();
 
-      List<String> fetchedCategories =
-          snapshot.docs.map((doc) => doc['name'].toString()).toList();
+      List<Map<String, String>> fetchedCategories = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'name': doc['name'].toString(),
+        };
+      }).toList();
 
       setState(() {
         categories = fetchedCategories;
@@ -42,7 +49,6 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // Title
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Align(
@@ -58,7 +64,6 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Tabs
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -72,14 +77,12 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // محتوى التاب
             Expanded(
               child: selectedTab == "All"
                   ? SingleChildScrollView(
                       child: Column(
                         children: [
                           const SizedBox(height: 30),
-                          // الصورة
                           Center(
                             child: Image.asset(
                               'assets/Images/value-prop-teach-2x-v3.webp',
@@ -87,7 +90,6 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          // العنوان
                           const Text(
                             "What will you learn first?",
                             style: TextStyle(
@@ -97,7 +99,6 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // الوصف
                           const Text(
                             "Your courses will go here.",
                             style: TextStyle(
@@ -106,7 +107,6 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                             ),
                           ),
                           const SizedBox(height: 30),
-                          // الكاتيجوريز من فايربيز
                           Padding(
                             padding: const EdgeInsets.only(left: 16),
                             child: Align(
@@ -117,11 +117,28 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                                   return Padding(
                                     padding:
                                         const EdgeInsets.symmetric(vertical: 8),
-                                    child: Text(
-                                      category,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                SubCategoriesScreen(
+                                              categoryName:
+                                                  category['name'] ?? '',
+                                              categoryId:
+                                                  category['id'] ?? '',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        category['name'] ?? '',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          decoration: TextDecoration.underline,
+                                        ),
                                       ),
                                     ),
                                   );
@@ -134,7 +151,6 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                       ),
                     )
                   : buildTabContent(),
-
             ),
           ],
         ),
@@ -143,53 +159,52 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
   }
 
   Widget buildTabContent() {
-  if (selectedTab == "Downloaded") {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        SizedBox(height: 60),
-        Icon(
-          Icons.download_for_offline_outlined,
-          color: Colors.white,
-          size: 60,
-        ),
-        SizedBox(height: 20),
-        Text(
-          "Nothings downloaded yet",
-          style: TextStyle(
+    if (selectedTab == "Downloaded") {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          SizedBox(height: 60),
+          Icon(
+            Icons.download_for_offline_outlined,
             color: Colors.white,
+            size: 60,
+          ),
+          SizedBox(height: 20),
+          Text(
+            "Nothings downloaded yet",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              "When you download a course to take with you, you'll see them here!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      return const Center(
+        child: Text(
+          "No Matching courses",
+          style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
             fontSize: 16,
           ),
         ),
-        SizedBox(height: 10),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            "When you download a course to take with you, you'll see them here!",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ],
-    );
-  } else {
-    return const Center(
-      child: Text(
-        "No Matching courses",
-        style: TextStyle(
-           fontWeight: FontWeight.bold,
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-    );
+      );
+    }
   }
-}
-
 
   Widget buildTab(String label) {
     bool isSelected = selectedTab == label;
