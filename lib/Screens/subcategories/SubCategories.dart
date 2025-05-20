@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
+import 'package:udemyflutter/customcard/coursesCard.dart';
+import 'package:udemyflutter/customcategory/custombutton.dart';
 
 class SubCategoriesScreen extends StatefulWidget {
   final String categoryName;
@@ -62,6 +65,19 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
         'price': doc['price'] ?? 'Free',
       };
     }).toList();
+  }
+
+  // Widget to display star rating
+  Widget _buildStarRating(double rating) {
+    return Row(
+      children: List.generate(5, (index) {
+        return Icon(
+          index < rating.floor() ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 16,
+        );
+      }),
+    );
   }
 
   @override

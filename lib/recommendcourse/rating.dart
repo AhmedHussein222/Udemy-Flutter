@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:udemyflutter/customcard/coursesCard.dart';  // أكيد عندك الكارد ده
+import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
+import 'package:udemyflutter/customcard/coursesCard.dart';
 
 class TopRatedCourses extends StatelessWidget {
   const TopRatedCourses({super.key});
@@ -13,20 +14,16 @@ class TopRatedCourses extends StatelessWidget {
         const Text(
           "Top Rated Courses",
           style: TextStyle(
-            fontSize: 20, 
-            fontWeight: FontWeight.bold, 
-            color: Colors.white
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 12),
         SizedBox(
           height: 350,
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('Courses')
-                .where('rating.rate', isGreaterThan: 4.5) // فلتر على التقييم
-                .orderBy('rating.rate', descending: true) // ترتيب تنازلي
-                .snapshots(),
+            stream: FirebaseFirestore.instance.collection('Courses').snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -40,50 +37,112 @@ class TopRatedCourses extends StatelessWidget {
               } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return const Center(
                   child: Text(
-                    'No top rated courses available',
+                    'No courses available',
                     style: TextStyle(color: Colors.white),
                   ),
                 );
               }
 
-              final courses = snapshot.data!.docs;
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('Reviews').snapshots(),
+                builder: (context, reviewsSnapshot) {
+                  if (reviewsSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (reviewsSnapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${reviewsSnapshot.error}',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
 
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: courses.length,
-                itemBuilder: (context, index) {
-                  final course = courses[index].data() as Map<String, dynamic>;
-                  final instructorId = course['instructor_id'];
+                
+                  final ratingsMap = <String, List<double>>{};
+                  for (var doc in reviewsSnapshot.data!.docs) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final courseId = data['course_id']?.toString();
+                    final rating = data['rating']?.toDouble() ?? 0.0;
+                    if (courseId != null) {
+                      ratingsMap.putIfAbsent(courseId, () => []).add(rating);
+                    }
+                  }
 
-                  return FutureBuilder<DocumentSnapshot>(
-                    future: FirebaseFirestore.instance
-                        .collection('Users')
-                        .doc(instructorId)
-                        .get(),
-                    builder: (context, instructorSnapshot) {
-                      if (!instructorSnapshot.hasData || !instructorSnapshot.data!.exists) {
-                        return const SizedBox();
-                      }
+                  final averageRatings = <String, double>{};
+                  final reviewCounts = <String, int>{};
+                  ratingsMap.forEach((courseId, ratings) {
+                    final avg = ratings.isNotEmpty ? ratings.reduce((a, b) => a + b) / ratings.length : 0.0;
+                    averageRatings[courseId] = avg;
+                    reviewCounts[courseId] = ratings.length;
+                  });
 
-                      final instructor = instructorSnapshot.data!;
-                      final instructorName =
-                          '${instructor['first_name']} ${instructor['last_name']}';
+                  
+                  final courses = snapshot.data!.docs.where((doc) {
+                    final courseId = doc.id;
+                    final avgRating = averageRatings[courseId] ?? 0.0;
+                    return avgRating > 4.5;
+                  }).toList();
 
-                      return GestureDetector(
-                        onTap: () {
-                          // افتحي تفاصيل الكورس عند الضغط، لو عندك صفحة تفاصيل
-                          // Navigator.push(context, MaterialPageRoute(
-                          //   builder: (context) => CourseDetailsScreen(courseData: course),
-                          // ));
+                  if (courses.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No top rated courses available',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: courses.length,
+                    itemBuilder: (context, index) {
+                      final courseDoc = courses[index];
+                      final course = courseDoc.data() as Map<String, dynamic>;
+                      final courseId = courseDoc.id;
+                      final instructorId = course['instructor_id'];
+
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('Users')
+                            .doc(instructorId)
+                            .get(),
+                        builder: (context, instructorSnapshot) {
+                          if (!instructorSnapshot.hasData || !instructorSnapshot.data!.exists) {
+                            return const SizedBox();
+                          }
+
+                          final instructor = instructorSnapshot.data!;
+                          final instructorName =
+                              '${instructor['first_name']} ${instructor['last_name']}';
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CourseDetailsScreen(
+                                    courseData: {
+                                      ...course,
+                                      'id': courseId,
+                                      'rating': {
+                                        'rate': averageRatings[courseId] ?? 0.0,
+                                        'count': reviewCounts[courseId] ?? 0,
+                                      },
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                            child: HoverCourseCard(
+                              imageUrl: course['thumbnail'] ?? '', 
+                              title: course['title'] ?? 'No Title',
+                              instructor: instructorName,
+                              price: double.tryParse(course['price'].toString()) ?? 0.0,
+                              discount: double.tryParse(course['discount'].toString()) ?? 0.0,
+                              rating: averageRatings[courseId] ?? 0.0,
+                            ),
+                          );
                         },
-                        child: HoverCourseCard(
-                          imageUrl: course['thumbnail'],
-                          title: course['title'],
-                          instructor: instructorName,
-                          price: double.tryParse(course['price'].toString()) ?? 0.0,
-                          discount: double.tryParse(course['discount'].toString()) ?? 0.0,
-                          rating: course['rating']['rate']?.toDouble() ?? 0.0,
-                        ),
                       );
                     },
                   );
