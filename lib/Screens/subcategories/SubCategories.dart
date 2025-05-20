@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
-import 'package:udemyflutter/customcard/coursesCard.dart';
-import 'package:udemyflutter/customcategory/custombutton.dart';
 
 class SubCategoriesScreen extends StatefulWidget {
   final String categoryName;
@@ -21,6 +18,10 @@ class SubCategoriesScreen extends StatefulWidget {
 class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> subCategories = [];
   TabController? _tabController;
+
+  // خزن هنا التقييمات وعدد المراجعات لكل كورس
+  Map<String, double> averageRatings = {};
+  Map<String, int> reviewCounts = {};
 
   @override
   void initState() {
@@ -59,6 +60,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
 
     return snapshot.docs.map((doc) {
       return {
+        'id': doc.id,
         'title': doc['title'] ?? 'No Title',
         'image': doc['thumbnail'] ?? '',
         'description': doc['description'] ?? '',
@@ -67,15 +69,55 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
     }).toList();
   }
 
-  // Widget to display star rating
-  Widget _buildStarRating(double rating) {
+  // دالة لتحميل التقييمات لكل الكورسات الموجودة
+  Future<void> fetchRatingsForCourses(List<String> courseIds) async {
+    if (courseIds.isEmpty) return;
+
+    try {
+      QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
+          .collection('Reviews')
+          .where('course_id', whereIn: courseIds)
+          .get();
+
+      final ratingsMap = <String, List<double>>{};
+
+      for (var doc in reviewsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final courseId = data['course_id']?.toString();
+        final rating = (data['rating'] is int) ? (data['rating'] as int).toDouble() : (data['rating'] ?? 0.0);
+        if (courseId != null) {
+          ratingsMap.putIfAbsent(courseId, () => []).add(rating);
+        }
+      }
+
+      final avgRatings = <String, double>{};
+      final revCounts = <String, int>{};
+
+      ratingsMap.forEach((courseId, ratings) {
+        final avg = ratings.isNotEmpty ? ratings.reduce((a, b) => a + b) / ratings.length : 0.0;
+        avgRatings[courseId] = avg;
+        revCounts[courseId] = ratings.length;
+      });
+
+      setState(() {
+        averageRatings = avgRatings;
+        reviewCounts = revCounts;
+      });
+    } catch (e) {
+      print('Error fetching ratings: $e');
+    }
+  }
+
+  Widget buildStarRating(double rating) {
     return Row(
-      children: List.generate(5, (index) {
-        return Icon(
-          index < rating.floor() ? Icons.star : Icons.star_border,
-          color: Colors.amber,
-          size: 16,
-        );
+      children: List.generate(5, (i) {
+        if (i < rating.floor()) {
+          return const Icon(Icons.star, color: Colors.amber, size: 16);
+        } else if (i < rating) {
+          return const Icon(Icons.star_half, color: Colors.amber, size: 16);
+        } else {
+          return const Icon(Icons.star_border, color: Colors.amber, size: 16);
+        }
       }),
     );
   }
@@ -101,9 +143,7 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
                     indicatorColor: Colors.purple,
                     labelColor: Colors.white,
                     unselectedLabelColor: Colors.grey,
-                    tabs: subCategories
-                        .map((sub) => Tab(text: sub['name']))
-                        .toList(),
+                    tabs: subCategories.map((sub) => Tab(text: sub['name'])).toList(),
                   ),
                 ),
                 Expanded(
@@ -124,6 +164,13 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
                           }
 
                           final courses = snapshot.data!;
+
+                          // لو ما جبناش التقييمات للكورسات بعد، نبعت نجيبهم
+                          if (averageRatings.isEmpty && reviewCounts.isEmpty) {
+                            // استدعاء جلب التقييمات لكل كورس
+                            fetchRatingsForCourses(courses.map((c) => c['id'] as String).toList());
+                          }
+
                           return GridView.builder(
                             padding: const EdgeInsets.all(16),
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -135,6 +182,12 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
                             itemCount: courses.length,
                             itemBuilder: (context, index) {
                               final course = courses[index];
+                              final courseId = course['id'] as String;
+
+                              // خذ التقييمات من الـ maps اللي جبناها
+                              final rating = averageRatings[courseId] ?? 0;
+                              final reviewsCount = reviewCounts[courseId] ?? 0;
+
                               return Card(
                                 color: Colors.grey[900],
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -157,18 +210,35 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(course['title'],
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                          Text(
+                                            course['title'],
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                          ),
                                           const SizedBox(height: 4),
-                                          Text(course['description'],
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                                          Text(
+                                            course['description'],
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            children: [
+                                              buildStarRating(rating),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "$rating ($reviewsCount)",
+                                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
                                           const SizedBox(height: 8),
-                                          Text("Price: ${course['price']}",
-                                              style: const TextStyle(color: Colors.purpleAccent, fontWeight: FontWeight.bold)),
+                                          Text(
+                                            "Price: ${course['price']}",
+                                            style: const TextStyle(color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                                          ),
                                         ],
                                       ),
                                     ),

@@ -505,5 +505,3 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   }
 }
 
-// لاحظ أنك محتاج تستورد أو تعرّف الـ CartScreen
-// import 'package:your_app/cart_screen.dart';
