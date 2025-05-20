@@ -4,6 +4,7 @@ import 'package:udemyflutter/Screens/feature/feature.dart';
 import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
 import 'package:udemyflutter/Screens/search/search.dart';
 import 'package:udemyflutter/Screens/wishlist/wishlist.dart';
+import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,9 +47,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> pages = [
     FeatureScreen(),
     SubCategoryPage(),
-    MylearningScreen(),
+    MyLearningScreen(),
     WishlistScreen(),
     AccountScreen(),
+    CartScreen(), // Add the CartScreen to the list
   ];
 
   @override
@@ -67,16 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 overlayColor: WidgetStateProperty.all(Colors.grey[800]), 
               ),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Cart feature coming soon!'),
-                    backgroundColor: Colors.blueAccent,
-                    behavior: SnackBarBehavior.floating,
-                    margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-                    elevation: 6,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CartScreen(),
                   ),
                 );
               },
