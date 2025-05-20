@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:udemyflutter/Screens/home/homePage.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -26,7 +27,6 @@ class CartScreen extends StatelessWidget {
     );
 
     if (confirm == true) {
-      // امسح كل العناصر في الكارت (افتراضياً نفترض ان الدفع تم)
       for (var doc in docs) {
         await doc.reference.delete();
       }
@@ -42,17 +42,19 @@ class CartScreen extends StatelessWidget {
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Cart")),
+        backgroundColor: Colors.black,
+        appBar: AppBar(title: const Text("Cart", style: TextStyle(color: Colors.white))),
         body: const Center(child: Text("Please login first")),
       );
     }
 
     final cartItemsRef = FirebaseFirestore.instance
-        .collection('Cart')
+        .collection('Carts')
         .doc(user.uid)
-        .collection('Items');
+        .collection('items');
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(title: const Text("My Cart")),
       body: StreamBuilder<QuerySnapshot>(
         stream: cartItemsRef.snapshots(),
@@ -70,13 +72,16 @@ class CartScreen extends StatelessWidget {
         "Your Cart is empty!",
         style: TextStyle(
           fontSize: 20,
+          color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
       ),
       const SizedBox(height: 20),
       ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/feature'); // أو استخدمي push لو عايزة
+          Navigator.push(context  , MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ));
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.purple,

@@ -1,5 +1,42 @@
 {
-  "@@locale": "en",
-  "hello": "Hello",
-  "welcome": "Welcome to the app!"
+  "loginTitle": "Log in to continue your learning journey",
+  "emailHint": "Email",
+  "passwordHint": "Password",
+  "loginButton": "Log in with email",
+  "otherLoginOptions": "_____ Other login options _____",
+  "signupPrompt": "Don't have an account? Sign Up",
+  "loginSuccess": "Login successful!",
+  "errorGeneric": "An error occurred",
+  "userNotFound": "No user found for that email.",
+  "wrongPassword": "Wrong password provided.",
+  "@loginTitle": {
+    "description": "Title for the login screen"
+  },
+  "@emailHint": {
+    "description": "Hint text for the email field"
+  },
+  "@passwordHint": {
+    "description": "Hint text for the password field"
+  },
+  "@loginButton": {
+    "description": "Text for the login button"
+  },
+  "@otherLoginOptions": {
+    "description": "Text for alternative login options divider"
+  },
+  "@signupPrompt": {
+    "description": "Prompt for signing up"
+  },
+  "@loginSuccess": {
+    "description": "Message shown when login is successful"
+  },
+  "@errorGeneric": {
+    "description": "Generic error message for login"
+  },
+  "@userNotFound": {
+    "description": "Error message when user is not found"
+  },
+  "@wrongPassword": {
+    "description": "Error message when password is incorrect"
+  }
 }

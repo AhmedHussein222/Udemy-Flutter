@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
-import 'package:udemyflutter/Services/wishlist_service.dart'; // Import WishlistService
+import 'package:udemyflutter/services/wishlist_service.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -16,8 +16,7 @@ class WishlistScreen extends StatefulWidget {
 class _WishlistScreenState extends State<WishlistScreen> {
   late Stream<QuerySnapshot> _wishlistStream;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final WishlistService _wishlistService =
-      WishlistService(); // Initialize service
+  final WishlistService _wishlistService = WishlistService();
   bool _isLoading = true;
 
   @override
@@ -39,25 +38,45 @@ class _WishlistScreenState extends State<WishlistScreen> {
       }
     });
   }
-
-  Future<void> _removeFromWishlist(String courseId) async {
-    final success = await _wishlistService.removeFromWishlist(courseId);
+Future<void> _toggleWishlistItem(String courseId) async {
+  try {
+    final isInWishlist = await _wishlistService.isInWishlist(courseId);
+    final success = await _wishlistService.toggleWishlist(courseId);
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Course removed from wishlist'),
-          backgroundColor: Colors.purple,
-        ),
-      );
+      final message = isInWishlist
+          ? 'Course removed from wishlist'
+          : 'Course added to wishlist';
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.purple,
+          ),
+        );
+      }
     } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update wishlist'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  } catch (e) {
+    print('Error toggling wishlist: $e');
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to remove course from wishlist'),
+          content: Text('Error updating wishlist'),
           backgroundColor: Colors.red,
         ),
       );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -71,43 +90,42 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body:
-          _isLoading
-              ? const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              )
-              : StreamBuilder<QuerySnapshot>(
-                stream: _wishlistStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Colors.purple),
-                    );
-                  }
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.purple),
+            )
+          : StreamBuilder<QuerySnapshot>(
+              stream: _wishlistStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.purple),
+                  );
+                }
 
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Error: ${snapshot.error}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  );
+                }
 
-                  // Check if user is logged in
-                  if (_auth.currentUser == null) {
-                    return _buildNotLoggedInView();
-                  }
+                // Check if user is logged in
+                if (_auth.currentUser == null) {
+                  return _buildNotLoggedInView();
+                }
 
-                  // Check if wishlist is empty
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return _buildEmptyWishlistView();
-                  }
+                // Check if wishlist is empty
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return _buildEmptyWishlistView();
+                }
 
-                  // Build wishlist items
-                  return _buildWishlistItems(snapshot.data!.docs);
-                },
-              ),
+                // Build wishlist items
+                return _buildWishlistItems(snapshot.data!.docs);
+              },
+            ),
     );
   }
 
@@ -183,7 +201,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
                 );
               },
             ),
@@ -212,104 +230,119 @@ class _WishlistScreenState extends State<WishlistScreen> {
             child: const Icon(Icons.delete, color: Colors.white),
           ),
           onDismissed: (direction) {
-            _removeFromWishlist(courseId);
+            _toggleWishlistItem(courseId);
           },
-          child: Card(
-            color: const Color(0xFF1C1C1E),
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    bottomLeft: Radius.circular(4),
-                  ),
-                  child: Image.network(
-                    courseData['image_url']?.toString() ?? '',
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 120,
-                        height: 120,
-                        color: Colors.grey[800],
-                        child: const Icon(
-                          Icons.broken_image,
-                          color: Colors.white70,
-                        ),
-                      );
-                    },
+          child: GestureDetector(
+            onTap: () {
+              // Navigate to CourseDetailsScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CourseDetailsScreen(
+                    courseData: courseData,
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          courseData['title'] ?? 'Untitled Course',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+              );
+            },
+            child: Card(
+              color: const Color(0xFF1C1C1E),
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(4),
+                      bottomLeft: Radius.circular(4),
+                    ),
+                    child: Image.network(
+                      courseData['thumbnail']?.toString() ?? '',
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 120,
+                          height: 120,
+                          color: Colors.grey[800],
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.white70,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          courseData['instructor_name'] ?? 'Unknown Instructor',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${courseData['rating'] ?? 0}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '\$${courseData['price'] ?? 0}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.white70,
-                              ),
-                              onPressed: () => _removeFromWishlist(courseId),
-                            ),
-                          ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            courseData['title'] ?? 'Untitled Course',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            courseData['instructor_name'] ?? 'Unknown Instructor',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${(courseData['rating']?['rate'] ?? 0.0).toStringAsFixed(1)} (${courseData['rating']?['count'] ?? 0} reviews)',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                courseData['price'] == 0
+                                    ? 'Free'
+                                    : '\$${courseData['price'] ?? 0}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.white70,
+                                ),
+                                onPressed: () => _toggleWishlistItem(courseId),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
