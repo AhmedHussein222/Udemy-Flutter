@@ -67,12 +67,12 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 Stack(
                   children: [
                     Image.network(
-                      widget.courseData['thumbnail'] ?? 'https://via.placeholder.com/150',
+                      widget.courseData['thumbnail'] ?? 'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: 200,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
-                        'assets/images/default_course.jpg',
+                        'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: 200,

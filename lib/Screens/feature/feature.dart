@@ -95,6 +95,8 @@ class FeatureScreen extends StatelessWidget {
               fit: BoxFit.cover,
               width: double.infinity,
             ),
+           
+           
             const SizedBox(height: 20),
             const TopRatedCourses(),
             const SizedBox(height: 20),

@@ -42,14 +42,14 @@ class HoverCourseCard extends StatelessWidget {
                       height: 120,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
-                        'assets/images/default_course.jpg',
+                        'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
                         width: double.infinity,
                         height: 120,
                         fit: BoxFit.cover,
                       ),
                     )
                   : Image.asset(
-                      'assets/images/default_course.jpg',
+                      'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
                       width: double.infinity,
                       height: 120,
                       fit: BoxFit.cover,
