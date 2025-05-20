@@ -90,12 +90,15 @@ class FeatureScreen extends StatelessWidget {
                 }
               },
             ),
-            Image.asset(
-              'assets/Images/billboard-mobile-v3.webp',
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
-           
+
+    Image.asset(
+      'assets/Images/slider.png',
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: 130,
+    ),
+ 
+
            
             const SizedBox(height: 20),
             const TopRatedCourses(),
@@ -320,189 +323,195 @@ class FeatureScreen extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "Recent Reviews",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            // const SizedBox(height: 20),
+            // const Text(
+            //   "Recent Reviews",
+            //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            // ),
+            // const SizedBox(height: 12),
+            // SizedBox(
+            //   height: 200,
+            //   child: StreamBuilder<QuerySnapshot>(
+            //     stream: FirebaseFirestore.instance
+            //         .collection('Reviews')
+            //         .orderBy('created_at', descending: true)
+            //         .limit(10)
+            //         .snapshots(),
+            //     builder: (context, snapshot) {
+            //       if (snapshot.connectionState == ConnectionState.waiting) {
+            //         return const Center(child: CircularProgressIndicator());
+            //       } else if (snapshot.hasError) {
+            //         return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
+            //       } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            //         return const Center(child: Text('No reviews found', style: TextStyle(color: Colors.white)));
+            //       }
+
+            //       final reviews = snapshot.data!.docs;
+
+            //       return ListView.builder(
+            //         scrollDirection: Axis.horizontal,
+            //         itemCount: reviews.length,
+            //         itemBuilder: (context, index) {
+            //           final review = reviews[index].data() as Map<String, dynamic>;
+            //           final userId = review['user_id'];
+
+            //           return FutureBuilder<DocumentSnapshot>(
+            //             future: FirebaseFirestore.instance.collection('Users').doc(userId).get(),
+            //             builder: (context, userSnapshot) {
+            //               if (userSnapshot.connectionState == ConnectionState.waiting) {
+            //                 return const Center(child: CircularProgressIndicator());
+            //               } else if (userSnapshot.hasError || !userSnapshot.hasData || !userSnapshot.data!.exists) {
+            //                 return const SizedBox();
+            //               }
+
+            //               final user = userSnapshot.data!.data() as Map<String, dynamic>;
+            //               final userName = '${user['first_name'] ?? 'Unknown'} ${user['last_name'] ?? ''}';
+
+            //               return Card(
+            //                 color: Colors.grey[900],
+            //                 margin: const EdgeInsets.symmetric(horizontal: 8),
+            //                 shape: RoundedRectangleBorder(
+            //                   borderRadius: BorderRadius.circular(12),
+            //                 ),
+            //                 child: Container(
+            //                   width: 250,
+            //                   padding: const EdgeInsets.all(12),
+            //                   child: Column(
+            //                     crossAxisAlignment: CrossAxisAlignment.start,
+            //                     children: [
+            //                       Row(
+            //                         children: [
+            //                           CircleAvatar(
+            //                             radius: 20,
+            //                             backgroundColor: Colors.grey[800],
+            //                             child: ClipOval(
+            //                               child: user['profile_picture'] != null &&
+            //                                       user['profile_picture'].isNotEmpty
+            //                                   ? Image.network(
+            //                                       user['profile_picture'],
+            //                                       width: 40,
+            //                                       height: 40,
+            //                                       fit: BoxFit.cover,
+            //                                       errorBuilder: (context, error, stackTrace) => Image.asset(
+            //                                         'assets/images/default_user.jpg',
+            //                                         width: 40,
+            //                                         height: 40,
+            //                                         fit: BoxFit.cover,
+            //                                       ),
+            //                                     )
+            //                                   : Image.asset(
+            //                                       'assets/images/default_user.jpg',
+            //                                       width: 40,
+            //                                       height: 40,
+            //                                       fit: BoxFit.cover,
+            //                                     ),
+            //                             ),
+            //                           ),
+            //                           const SizedBox(width: 8),
+            //                           Expanded(
+            //                             child: Text(
+            //                               userName,
+            //                               style: const TextStyle(
+            //                                 color: Colors.white,
+            //                                 fontSize: 14,
+            //                                 fontWeight: FontWeight.bold,
+            //                               ),
+            //                               overflow: TextOverflow.ellipsis,
+            //                             ),
+            //                           ),
+            //                         ],
+            //                       ),
+            //                       const SizedBox(height: 8),
+            //                       Row(
+            //                         children: [
+            //                           _buildStarRating(review['rating']?.toDouble() ?? 0.0),
+            //                           const SizedBox(width: 4),
+            //                           Text(
+            //                             '${review['rating']?.toStringAsFixed(1) ?? '0.0'}',
+            //                             style: const TextStyle(color: Colors.white70, fontSize: 12),
+            //                           ),
+            //                         ],
+            //                       ),
+            //                       const SizedBox(height: 8),
+            //                       Text(
+            //                         review['comment'] ?? 'No comment',
+            //                         style: const TextStyle(color: Colors.white70, fontSize: 12),
+            //                         maxLines: 3,
+            //                         overflow: TextOverflow.ellipsis,
+            //                       ),
+            //                     ],
+            //                   ),
+            //                 ),
+            //               );
+            //             },
+            //           );
+            //         },
+            //       );
+            //     },
+            //   ),
+            // ),
+       
+       
+       
+           SizedBox(height: 20),
+        Text(
+             "Categories",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 200,
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('Reviews')
-                    .orderBy('created_at', descending: true)
-                    .limit(10)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
-                  } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('No reviews found', style: TextStyle(color: Colors.white)));
-                  }
 
-                  final reviews = snapshot.data!.docs;
+           StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance.collection('Categories').snapshots(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      return Center(
+        child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)),
+      );
+    } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return const Center(
+        child: Text('No categories found', style: TextStyle(color: Colors.white)),
+      );
+    } else {
+      final categories = snapshot.data!.docs;
 
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: reviews.length,
-                    itemBuilder: (context, index) {
-                      final review = reviews[index].data() as Map<String, dynamic>;
-                      final userId = review['user_id'];
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Wrap(
+          spacing: 10, 
+          runSpacing: 10, 
+          alignment: WrapAlignment.start,
+          children: categories.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final catName = data['name'];
 
-                      return FutureBuilder<DocumentSnapshot>(
-                        future: FirebaseFirestore.instance.collection('Users').doc(userId).get(),
-                        builder: (context, userSnapshot) {
-                          if (userSnapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
-                          } else if (userSnapshot.hasError || !userSnapshot.hasData || !userSnapshot.data!.exists) {
-                            return const SizedBox();
-                          }
+            return CustomButtonCategory (
+              text: catName,
+              textColor: Colors.white,
+              color: Colors.black,
+             onPressed: () {
+  final categoryId = doc.id; 
+  final categoryName = data['name'];
 
-                          final user = userSnapshot.data!.data() as Map<String, dynamic>;
-                          final userName = '${user['first_name'] ?? 'Unknown'} ${user['last_name'] ?? ''}';
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => SubCategoriesScreen(
+        categoryId: categoryId,
+        categoryName: categoryName,
+      ),
+    ),
+  );
+},
 
-                          return Card(
-                            color: Colors.grey[900],
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Container(
-                              width: 250,
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 20,
-                                        backgroundColor: Colors.grey[800],
-                                        child: ClipOval(
-                                          child: user['profile_picture'] != null &&
-                                                  user['profile_picture'].isNotEmpty
-                                              ? Image.network(
-                                                  user['profile_picture'],
-                                                  width: 40,
-                                                  height: 40,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) => Image.asset(
-                                                    'assets/images/default_user.jpg',
-                                                    width: 40,
-                                                    height: 40,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                )
-                                              : Image.asset(
-                                                  'assets/images/default_user.jpg',
-                                                  width: 40,
-                                                  height: 40,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          userName,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      _buildStarRating(review['rating']?.toDouble() ?? 0.0),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '${review['rating']?.toStringAsFixed(1) ?? '0.0'}',
-                                        style: const TextStyle(color: Colors.white70, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    review['comment'] ?? 'No comment',
-                                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Categories",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('Categories').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('No categories found', style: TextStyle(color: Colors.white)),
-                  );
-                }
+            );
+          }).toList(),
+        ),
+      );
+    }
+  },
+),
 
-                final categories = snapshot.data!.docs;
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    alignment: WrapAlignment.start,
-                    children: categories.map((doc) {
-                      final data = doc.data() as Map<String, dynamic>;
-                      final catName = data['name'];
-
-                      return CustomButtonCategory(
-                        text: catName,
-                        textColor: Colors.white,
-                        color: Colors.black,
-                        onPressed: () {
-                          final categoryId = doc.id;
-                          final categoryName = data['name'];
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SubCategoriesScreen(
-                                categoryId: categoryId,
-                                categoryName: categoryName,
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),

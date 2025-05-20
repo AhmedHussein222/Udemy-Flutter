@@ -1,42 +1,6 @@
 {
-  "loginTitle": "سجل الدخول لمواصلة رحلتك التعليمية",
-  "emailHint": "البريد الإلكتروني",
-  "passwordHint": "كلمة المرور",
-  "loginButton": "تسجيل الدخول بالبريد الإلكتروني",
-  "otherLoginOptions": "_____ خيارات تسجيل الدخول الأخرى _____",
-  "signupPrompt": "ليس لديك حساب؟ اشترك الآن",
-  "loginSuccess": "تم تسجيل الدخول بنجاح!",
-  "errorGeneric": "حدث خطأ",
-  "userNotFound": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني.",
-  "wrongPassword": "كلمة المرور المقدمة غير صحيحة.",
-  "@loginTitle": {
-    "description": "عنوان شاشة تسجيل الدخول"
-  },
-  "@emailHint": {
-    "description": "نص تلميح لحقل البريد الإلكتروني"
-  },
-  "@passwordHint": {
-    "description": "نص تلميح لحقل كلمة المرور"
-  },
-  "@loginButton": {
-    "description": "نص زر تسجيل الدخول"
-  },
-  "@otherLoginOptions": {
-    "description": "نص فاصل خيارات تسجيل الدخول البديلة"
-  },
-  "@signupPrompt": {
-    "description": "نص لدعوة التسجيل"
-  },
-  "@loginSuccess": {
-    "description": "رسالة تظهر عند نجاح تسجيل الدخول"
-  },
-  "@errorGeneric": {
-    "description": "رسالة خطأ عامة لتسجيل الدخول"
-  },
-  "@userNotFound": {
-    "description": "رسالة خطأ عند عدم العثور على المستخدم"
-  },
-  "@wrongPassword": {
-    "description": "رسالة خطأ عند إدخال كلمة مرور غير صحيحة"
-  }
+  "login_title": "سجّل الدخول للمتابعة في رحلة التعلم",
+  "email_hint": "البريد الإلكتروني",
+  "password_hint": "كلمة المرور",
+  "login_button": "تسجيل الدخول بالبريد الإلكتروني"
 }
