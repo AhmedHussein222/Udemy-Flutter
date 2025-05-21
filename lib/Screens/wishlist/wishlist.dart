@@ -14,7 +14,7 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  late Stream<QuerySnapshot> _wishlistStream;
+  late Stream<DocumentSnapshot> _wishlistStream; // عدلنا من QuerySnapshot إلى DocumentSnapshot
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final WishlistService _wishlistService = WishlistService();
   bool _isLoading = true;
@@ -36,7 +36,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     });
   }
 
-   Future<void> _toggleWishlistItem(String courseId) async {
+  Future<void> _toggleWishlistItem(String courseId) async {
     try {
       final success = await _wishlistService.toggleWishlist(courseId);
       if (success) {
@@ -71,7 +71,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,7 +87,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           ? const Center(
               child: CircularProgressIndicator(color: Colors.purple),
             )
-          : StreamBuilder<QuerySnapshot>(
+          : StreamBuilder<DocumentSnapshot>(
               stream: _wishlistStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,11 +109,19 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   return _buildNotLoggedInView();
                 }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                if (!snapshot.hasData || !snapshot.data!.exists || (snapshot.data!.data() as Map<String, dynamic>?)?.isEmpty == true) {
                   return _buildEmptyWishlistView();
                 }
 
-                return _buildWishlistItems(snapshot.data!.docs);
+                final wishlistData = snapshot.data!.data() as Map<String, dynamic>;
+                final wishlistItems = List<Map<String, dynamic>>.from(wishlistData['items'] ?? [])
+                  ..sort((a, b) {
+                    final aTimestamp = (a['addedAt'] as Timestamp?) ?? Timestamp.fromDate(DateTime(0));
+                    final bTimestamp = (b['addedAt'] as Timestamp?) ?? Timestamp.fromDate(DateTime(0));
+                    return bTimestamp.compareTo(aTimestamp);
+                  });
+
+                return _buildWishlistItems(wishlistItems);
               },
             ),
     );
@@ -202,7 +209,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  Widget _buildWishlistItems(List<QueryDocumentSnapshot> wishlistDocs) {
+  Widget _buildWishlistItems(List<Map<String, dynamic>> wishlistItems) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('Reviews').snapshots(),
       builder: (context, reviewsSnapshot) {
@@ -233,11 +240,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: wishlistDocs.length,
+          itemCount: wishlistItems.length,
           itemBuilder: (context, index) {
-            final wishlistItem = wishlistDocs[index];
-            final wishlistCourse = wishlistItem.data() as Map<String, dynamic>;
-            final courseId = wishlistItem.id;
+            final wishlistCourse = wishlistItems[index]; // عدلنا من wishlistItem إلى wishlistCourse
+            final courseId = wishlistCourse['id']; // استخدمنا id من الـ array
 
             // جلب بيانات الكورس من collection الـ Courses
             return FutureBuilder<DocumentSnapshot>(
@@ -268,7 +274,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         };
                       }
                       final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
-                      final userData = userDoc.data() as Map<String, dynamic>?;
+                      final userData = userDoc.data();
                       return {
                         'userName': userData != null
                             ? '${userData['first_name'] ?? 'Unknown'} ${userData['last_name'] ?? ''}'

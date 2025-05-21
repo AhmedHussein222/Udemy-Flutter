@@ -8,12 +8,12 @@ class CustomButtonCategory extends StatefulWidget {
   final Color textColor;
 
   const CustomButtonCategory({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.color = Colors.black,
     this.textColor = Colors.white,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomButtonCategory> createState() => _CustomButtonCategoryState();
