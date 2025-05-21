@@ -21,7 +21,6 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
   List<Map<String, dynamic>> subCategories = [];
   TabController? _tabController;
 
-
   Map<String, double> averageRatings = {};
   Map<String, int> reviewCounts = {};
 
@@ -64,7 +63,9 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
     return {
       'id': doc.id,
       'title': doc['title'] ?? 'No Title',
-      'image': doc['thumbnail'] ?? '',
+      'thumbnail': doc['thumbnail']?.isNotEmpty ?? false
+          ? doc['thumbnail']
+          : 'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg', 
       'description': doc['description'] ?? '',
       'price': doc['price'] ?? 'Free',
       'rating': {
@@ -78,9 +79,7 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
     };
   }).toList();
 }
-
-
-  // دالة لتحميل التقييمات لكل الكورسات الموجودة
+ 
   Future<void> fetchRatingsForCourses(List<String> courseIds) async {
     if (courseIds.isEmpty) return;
 
@@ -118,6 +117,7 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
       print('Error fetching ratings: $e');
     }
   }
+
   Widget buildStarRating(double rating) {
     return Row(
       children: List.generate(5, (i) {
@@ -184,13 +184,13 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
                        
                        
                        
-                      return GridView.builder(
+                 return GridView.builder(
   padding: const EdgeInsets.all(16),
   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: 2,
     crossAxisSpacing: 16,
     mainAxisSpacing: 16,
-    childAspectRatio: 0.55, // تعديل النسبة لتجنب الـ overflow
+    childAspectRatio: 0.55, 
   ),
   itemCount: courses.length,
   itemBuilder: (context, index) {
@@ -202,7 +202,7 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
 
     return GestureDetector(
       onTap: () {
-        // التنقل لصفحة CourseDetailsScreen مع تمرير بيانات الكورس
+        print("Course data: $course");
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -213,23 +213,33 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
       child: Card(
         color: Colors.grey[900],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        clipBehavior: Clip.antiAlias, // لمنع أي محتوى من التجاوز
+        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            course['image'] != ''
+            course['thumbnail']?.isNotEmpty ?? false
                 ? ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                     child: Image.network(
-                      course['image'],
+                      course['thumbnail'],
                       height: 120,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.image_not_supported,
-                        size: 120,
-                        color: Colors.white70,
-                      ),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const SizedBox(
+                          height: 120,
+                          child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        print("Image load error for ${course['image']}: $error"); // للتصحيح
+                        return const Icon(
+                          Icons.image_not_supported,
+                          size: 120,
+                          color: Colors.white70,
+                        );
+                      },
                     ),
                   )
                 : const Icon(Icons.image_not_supported, size: 120, color: Colors.white70),
@@ -276,8 +286,9 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
     );
   },
 );
-                       
-                       
+                      
+                      
+                      
                         },
                       );
                     }).toList(),

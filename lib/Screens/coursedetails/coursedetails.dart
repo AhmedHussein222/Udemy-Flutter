@@ -479,4 +479,3 @@ void _showSnackBar(String message, [Color backgroundColor = Colors.red]) {
     );
   }
 }
-
