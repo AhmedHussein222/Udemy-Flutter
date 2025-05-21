@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 
+
 class SubCategoriesScreen extends StatefulWidget {
   final String categoryName;
   final String categoryId;
@@ -19,6 +20,7 @@ class SubCategoriesScreen extends StatefulWidget {
 class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> subCategories = [];
   TabController? _tabController;
+
 
   Map<String, double> averageRatings = {};
   Map<String, int> reviewCounts = {};
@@ -116,7 +118,6 @@ Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
       print('Error fetching ratings: $e');
     }
   }
-
   Widget buildStarRating(double rating) {
     return Row(
       children: List.generate(5, (i) {
