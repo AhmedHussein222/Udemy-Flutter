@@ -1,30 +1,38 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({Key? key}) : super(key: key);
 
-  Future<void> _showCheckoutDialog(BuildContext context, List<QueryDocumentSnapshot> docs) async {
+  Future<void> _showCheckoutDialog(
+    BuildContext context,
+    List<QueryDocumentSnapshot> docs,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Checkout'),
-        content: const Text('Are you sure you want to complete the payment?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirm Checkout'),
+            content: const Text(
+              'Are you sure you want to complete the payment?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple[300],
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Yes'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[300]),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -56,9 +64,24 @@ class CartScreen extends StatelessWidget {
         .collection('items');
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("My Cart"),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/checkout',
+                arguments: {'userId': user.uid, 'cartItemsRef': cartItemsRef},
+              );
+            },
+          ),
+        ],
+  
       backgroundColor: Colors.black,
-      appBar: AppBar(title: const Text("My Cart", style: TextStyle(color: Colors.white)),
-      backgroundColor: Colors.black,),
+     
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: cartItemsRef.snapshots(),
         builder: (context, cartSnapshot) {
@@ -74,7 +97,7 @@ class CartScreen extends StatelessWidget {
                   const Text(
                     "Your Cart is empty!",
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 20, 
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -118,7 +141,7 @@ class CartScreen extends StatelessWidget {
                 return Center(child: Text('Error: ${reviewsSnapshot.error}', style: const TextStyle(color: Colors.white)));
               }
 
-              // Calculate ratings from Reviews
+                // Calculate ratings from reviewUsersSnapshot
               final ratingsMap = <String, List<double>>{};
               for (var doc in reviewsSnapshot.data!.docs) {
                 final data = doc.data() as Map<String, dynamic>;

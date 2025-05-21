@@ -98,7 +98,7 @@ StreamBuilder<QuerySnapshot>(
         children: [
           pages[screenIndex],
           Positioned(
-            top: 0,
+            top: 40,
             right: 1,
             child: StreamBuilder<QuerySnapshot<Object?>>(
               stream: user != null
