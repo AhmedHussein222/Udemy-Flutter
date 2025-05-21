@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
-import 'package:udemyflutter/Services/wishlist_service.dart'; // Import WishlistService
+import 'package:udemyflutter/services/wishlist_service.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -16,8 +16,7 @@ class WishlistScreen extends StatefulWidget {
 class _WishlistScreenState extends State<WishlistScreen> {
   late Stream<QuerySnapshot> _wishlistStream;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final WishlistService _wishlistService =
-      WishlistService(); // Initialize service
+  final WishlistService _wishlistService = WishlistService();
   bool _isLoading = true;
 
   @override
@@ -27,10 +26,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   void _initWishlistStream() {
-    // Use WishlistService to get wishlist stream
     _wishlistStream = _wishlistService.getWishlistStream();
-
-    // Set loading to false after a short delay
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
@@ -40,24 +36,41 @@ class _WishlistScreenState extends State<WishlistScreen> {
     });
   }
 
-  Future<void> _removeFromWishlist(String courseId) async {
-    final success = await _wishlistService.removeFromWishlist(courseId);
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Course removed from wishlist'),
-          backgroundColor: Colors.purple,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to remove course from wishlist'),
-          backgroundColor: Colors.red,
-        ),
-      );
+   Future<void> _toggleWishlistItem(String courseId) async {
+    try {
+      final success = await _wishlistService.toggleWishlist(courseId);
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Course removed from wishlist'),
+              backgroundColor: Colors.purple,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to remove course from wishlist'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error toggling wishlist: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error removing course from wishlist'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -71,43 +84,39 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body:
-          _isLoading
-              ? const Center(
-                child: CircularProgressIndicator(color: Colors.purple),
-              )
-              : StreamBuilder<QuerySnapshot>(
-                stream: _wishlistStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Colors.purple),
-                    );
-                  }
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.purple),
+            )
+          : StreamBuilder<QuerySnapshot>(
+              stream: _wishlistStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.purple),
+                  );
+                }
 
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Error: ${snapshot.error}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  );
+                }
 
-                  // Check if user is logged in
-                  if (_auth.currentUser == null) {
-                    return _buildNotLoggedInView();
-                  }
+                if (_auth.currentUser == null) {
+                  return _buildNotLoggedInView();
+                }
 
-                  // Check if wishlist is empty
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return _buildEmptyWishlistView();
-                  }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return _buildEmptyWishlistView();
+                }
 
-                  // Build wishlist items
-                  return _buildWishlistItems(snapshot.data!.docs);
-                },
-              ),
+                return _buildWishlistItems(snapshot.data!.docs);
+              },
+            ),
     );
   }
 
@@ -183,7 +192,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
                 );
               },
             ),
@@ -194,124 +203,227 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Widget _buildWishlistItems(List<QueryDocumentSnapshot> wishlistDocs) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: wishlistDocs.length,
-      itemBuilder: (context, index) {
-        final wishlistItem = wishlistDocs[index];
-        final courseData = wishlistItem.data() as Map<String, dynamic>;
-        final courseId = wishlistItem.id;
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('Reviews').snapshots(),
+      builder: (context, reviewsSnapshot) {
+        if (reviewsSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Colors.purple));
+        } else if (reviewsSnapshot.hasError) {
+          return Center(child: Text('Error: ${reviewsSnapshot.error}', style: const TextStyle(color: Colors.white)));
+        }
 
-        return Dismissible(
-          key: Key(courseId),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            color: Colors.red,
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          onDismissed: (direction) {
-            _removeFromWishlist(courseId);
+        // Calculate ratings from Reviews
+        final ratingsMap = <String, List<double>>{};
+        for (var doc in reviewsSnapshot.data!.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final courseId = data['course_id']?.toString();
+          final rating = data['rating']?.toDouble() ?? 0.0;
+          if (courseId != null) {
+            ratingsMap.putIfAbsent(courseId, () => []).add(rating);
+          }
+        }
+
+        final averageRatings = <String, double>{};
+        final reviewCounts = <String, int>{};
+        ratingsMap.forEach((courseId, ratings) {
+          final avg = ratings.isNotEmpty ? ratings.reduce((a, b) => a + b) / ratings.length : 0.0;
+          averageRatings[courseId] = avg;
+          reviewCounts[courseId] = ratings.length;
+        });
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: wishlistDocs.length,
+          itemBuilder: (context, index) {
+            final wishlistItem = wishlistDocs[index];
+            final wishlistCourse = wishlistItem.data() as Map<String, dynamic>;
+            final courseId = wishlistItem.id;
+
+            // جلب بيانات الكورس من collection الـ Courses
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance.collection('Courses').doc(courseId).get(),
+              builder: (context, courseSnapshot) {
+                if (courseSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                } else if (courseSnapshot.hasError || !courseSnapshot.hasData || !courseSnapshot.data!.exists) {
+                  return const Center(child: Text('Course not found', style: TextStyle(color: Colors.white)));
+                }
+
+                final course = courseSnapshot.data!.data() as Map<String, dynamic>;
+
+                // جلب بيانات الـ Reviews الخاصة بالكورس
+                final courseReviews = reviewsSnapshot.data!.docs
+                    .where((doc) => doc['course_id']?.toString() == courseId)
+                    .map((doc) => doc.data() as Map<String, dynamic>)
+                    .toList();
+
+                return FutureBuilder<List<Map<String, dynamic>>>(
+                  future: Future.wait(
+                    courseReviews.map((review) async {
+                      final userId = review['user_id']?.toString();
+                      if (userId == null) {
+                        return {
+                          'userName': 'Anonymous',
+                          'review': review,
+                        };
+                      }
+                      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+                      final userData = userDoc.data() as Map<String, dynamic>?;
+                      return {
+                        'userName': userData != null
+                            ? '${userData['first_name'] ?? 'Unknown'} ${userData['last_name'] ?? ''}'
+                            : 'Anonymous',
+                        'review': review,
+                      };
+                    }),
+                  ),
+                  builder: (context, reviewUsersSnapshot) {
+                    if (reviewUsersSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                    } else if (reviewUsersSnapshot.hasError) {
+                      return Center(child: Text('Error: ${reviewUsersSnapshot.error}', style: const TextStyle(color: Colors.white)));
+                    }
+
+                    final reviewUsers = reviewUsersSnapshot.data ?? [];
+
+                    return Dismissible(
+                      key: Key(courseId),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        color: Colors.red,
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (direction) {
+                        _toggleWishlistItem(courseId);
+                      },
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CourseDetailsScreen(
+                                courseData: {
+                                  ...course, // بيانات الكورس الكاملة من Courses
+                                  'id': courseId,
+                                  'rating': {
+                                    'rate': averageRatings[courseId] ?? 0.0,
+                                    'count': reviewCounts[courseId] ?? 0,
+                                  },
+                                  'reviews': reviewUsers,
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          color: const Color(0xFF1C1C1E),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(4),
+                                  bottomLeft: Radius.circular(4),
+                                ),
+                                child: Image.network(
+                                  wishlistCourse['thumbnail']?.toString() ?? '',
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 120,
+                                      height: 120,
+                                      color: Colors.grey[800],
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        color: Colors.white70,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        wishlistCourse['title']?.toString() ?? 'Untitled Course',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        wishlistCourse['instructor_name']?.toString() ?? 'Unknown Instructor',
+                                        style: TextStyle(
+                                          color: Colors.grey[400],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${(averageRatings[courseId] ?? 0.0).toStringAsFixed(1)} (${reviewCounts[courseId] ?? 0} reviews)',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            wishlistCourse['price'] == 0
+                                                ? 'Free'
+                                                : '\$${wishlistCourse['price']?.toString() ?? '0'}',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.delete_outline,
+                                              color: Colors.white70,
+                                            ),
+                                            onPressed: () => _toggleWishlistItem(courseId),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
           },
-          child: Card(
-            color: const Color(0xFF1C1C1E),
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    bottomLeft: Radius.circular(4),
-                  ),
-                  child: Image.network(
-                    courseData['image_url']?.toString() ?? '',
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 120,
-                        height: 120,
-                        color: Colors.grey[800],
-                        child: const Icon(
-                          Icons.broken_image,
-                          color: Colors.white70,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          courseData['title'] ?? 'Untitled Course',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          courseData['instructor_name'] ?? 'Unknown Instructor',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${courseData['rating'] ?? 0}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '\$${courseData['price'] ?? 0}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.white70,
-                              ),
-                              onPressed: () => _removeFromWishlist(courseId),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );

@@ -5,88 +5,108 @@ class WishlistService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Adds a course to the user's wishlist with course details.
-  Future<bool> addToWishlist(String courseId) async {
+  Future<bool> toggleWishlist(String courseId) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) {
-        // No user logged in
-        return false;
-      }
+      if (user == null) return false;
 
-      // Fetch course data
-      final courseDoc =
-          await _firestore.collection('Courses').doc(courseId).get();
-
-      if (!courseDoc.exists) {
-        // Course does not exist
-        return false;
-      }
-
-      // Extract course details
-      final courseData = courseDoc.data()!;
-      final wishlistData = {
-        'course_id': courseId,
-        'title': courseData['title'] ?? 'Unknown Course',
-        'image_url': courseData['thumbnail'] ?? '',
-        'price': courseData['price'] ?? 0.0,
-        'added_at': FieldValue.serverTimestamp(),
-      };
-
-      // Add to wishlist
-      await _firestore
+      // Check if course is in Carts (Still under Users/{uid}/Carts)
+      final cartDoc = await _firestore
           .collection('Users')
           .doc(user.uid)
-          .collection('wishlist')
+          .collection('Carts')
           .doc(courseId)
-          .set(wishlistData);
+          .get();
 
-      return true;
+      // New wishlist path
+      final wishlistDoc = await _firestore
+          .collection('Wishlists')
+          .doc(user.uid)
+          .collection('items')
+          .doc(courseId)
+          .get();
+
+      // If in Carts, remove from wishlist if exists
+      if (cartDoc.exists) {
+        if (wishlistDoc.exists) {
+          await _firestore
+              .collection('Wishlists')
+              .doc(user.uid)
+              .collection('items')
+              .doc(courseId)
+              .delete();
+          return true;
+        }
+        return false;
+      }
+
+      if (wishlistDoc.exists) {
+        await _firestore
+            .collection('Wishlists')
+            .doc(user.uid)
+            .collection('items')
+            .doc(courseId)
+            .delete();
+        return true;
+      } else {
+        final courseDoc =
+            await _firestore.collection('Courses').doc(courseId).get();
+
+        if (!courseDoc.exists) return false;
+
+        final course = courseDoc.data()!;
+        final instructorId = course['instructor_id'];
+
+        String instructorName = 'Unknown Instructor';
+        if (instructorId != null) {
+          final instructorDoc = await _firestore
+              .collection('Users')
+              .doc(instructorId)
+              .get();
+
+          if (instructorDoc.exists &&
+              instructorDoc.data()?['role'] == 'instructor') {
+            instructorName = instructorDoc.data()?['name'] ?? 'Unknown Instructor';
+          }
+        }
+
+        final wishlistData = {
+          'id': courseId,
+          'title': course['title'] ?? 'Untitled Course',
+          'price': course['price'] ?? 0.0,
+          'thumbnail': course['thumbnail'] ?? '',
+          'description': course['description'] ?? '',
+          'instructor_name': instructorName,
+          'rating': course['rating'] ?? {'count': 0, 'rate': 0.0},
+          'addedAt': FieldValue.serverTimestamp(),
+        };
+
+        await _firestore
+            .collection('Wishlists')
+            .doc(user.uid)
+            .collection('items')
+            .doc(courseId)
+            .set(wishlistData);
+
+        return true;
+      }
     } catch (e) {
-      // Log error for debugging
-      print('Error adding to wishlist: $e');
-      // Optionally, you can throw the error or notify the user via UI
+      print('Error toggling Wishlists: $e');
       return false;
     }
   }
 
-  /// Removes a course from the user's wishlist.
-  Future<bool> removeFromWishlist(String courseId) async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        return false;
-      }
-
-      await _firestore
-          .collection('Users')
-          .doc(user.uid)
-          .collection('wishlist')
-          .doc(courseId)
-          .delete();
-
-      return true;
-    } catch (e) {
-      print('Error removing from wishlist: $e');
-      return false;
-    }
-  }
-
-  /// Checks if a course is in the user's wishlist.
   Future<bool> isInWishlist(String courseId) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) {
-        return false;
-      }
+      if (user == null) return false;
 
-      final doc =
-          await _firestore
-              .collection('Users')
-              .doc(user.uid)
-              .collection('wishlist')
-              .doc(courseId)
-              .get();
+      final doc = await _firestore
+          .collection('Wishlists')
+          .doc(user.uid)
+          .collection('items')
+          .doc(courseId)
+          .get();
 
       return doc.exists;
     } catch (e) {
@@ -95,18 +115,50 @@ class WishlistService {
     }
   }
 
-  /// Returns a stream of the user's wishlist.
+  Future<bool> isInCarts(String courseId) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      final doc = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .collection('Carts')
+          .doc(courseId)
+          .get();
+
+      return doc.exists;
+    } catch (e) {
+      print('Error checking cart: $e');
+      return false;
+    }
+  }
+  Future<void> removeFromWishlist(String courseId) async {
+  try {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    await _firestore
+        .collection('Wishlists')
+        .doc(user.uid)
+        .collection('items')
+        .doc(courseId)
+        .delete();
+  } catch (e) {
+    print('Error removing from wishlist: $e');
+  }
+}
+
+
   Stream<QuerySnapshot> getWishlistStream() {
     final user = _auth.currentUser;
-    if (user == null) {
-      return Stream.empty();
-    }
+    if (user == null) return const Stream.empty();
 
     return _firestore
-        .collection('Users')
+        .collection('Wishlists')
         .doc(user.uid)
-        .collection('wishlist')
-        .orderBy('added_at', descending: true)
+        .collection('items')
+        .orderBy('addedAt', descending: true)
         .snapshots();
   }
 }
