@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 
 class SubCategoriesScreen extends StatefulWidget {
   final String categoryName;
@@ -19,7 +20,6 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
   List<Map<String, dynamic>> subCategories = [];
   TabController? _tabController;
 
-  // خزن هنا التقييمات وعدد المراجعات لكل كورس
   Map<String, double> averageRatings = {};
   Map<String, int> reviewCounts = {};
 
@@ -52,22 +52,31 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('Courses')
-        .where('subcategory_id', isEqualTo: subCategoryId)
-        .get();
+Future<List<Map<String, dynamic>>> fetchCourses(String subCategoryId) async {
+  QuerySnapshot snapshot = await FirebaseFirestore.instance
+      .collection('Courses')
+      .where('subcategory_id', isEqualTo: subCategoryId)
+      .get();
 
-    return snapshot.docs.map((doc) {
-      return {
-        'id': doc.id,
-        'title': doc['title'] ?? 'No Title',
-        'image': doc['thumbnail'] ?? '',
-        'description': doc['description'] ?? '',
-        'price': doc['price'] ?? 'Free',
-      };
-    }).toList();
-  }
+  return snapshot.docs.map((doc) {
+    return {
+      'id': doc.id,
+      'title': doc['title'] ?? 'No Title',
+      'image': doc['thumbnail'] ?? '',
+      'description': doc['description'] ?? '',
+      'price': doc['price'] ?? 'Free',
+      'rating': {
+        'rate': doc['rating']?['rate']?.toDouble() ?? 0.0,
+        'count': doc['rating']?['count'] ?? 0,
+      },
+      'language': doc['language'] ?? 'English',
+      'requirements': doc['requirements'] ?? [],
+      'what_will_learn': doc['what_will_learn'] ?? [],
+      'instructor_id': doc['instructor_id'] ?? '',
+    };
+  }).toList();
+}
+
 
   // دالة لتحميل التقييمات لكل الكورسات الموجودة
   Future<void> fetchRatingsForCourses(List<String> courseIds) async {
@@ -171,82 +180,103 @@ class _SubCategoriesScreenState extends State<SubCategoriesScreen> with SingleTi
                             fetchRatingsForCourses(courses.map((c) => c['id'] as String).toList());
                           }
 
-                          return GridView.builder(
-                            padding: const EdgeInsets.all(16),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 0.65,
-                            ),
-                            itemCount: courses.length,
-                            itemBuilder: (context, index) {
-                              final course = courses[index];
-                              final courseId = course['id'] as String;
+                       
+                       
+                       
+                      return GridView.builder(
+  padding: const EdgeInsets.all(16),
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 16,
+    mainAxisSpacing: 16,
+    childAspectRatio: 0.55, // تعديل النسبة لتجنب الـ overflow
+  ),
+  itemCount: courses.length,
+  itemBuilder: (context, index) {
+    final course = courses[index];
+    final courseId = course['id'] as String;
 
-                              // خذ التقييمات من الـ maps اللي جبناها
-                              final rating = averageRatings[courseId] ?? 0;
-                              final reviewsCount = reviewCounts[courseId] ?? 0;
+    final rating = averageRatings[courseId] ?? 0;
+    final reviewsCount = reviewCounts[courseId] ?? 0;
 
-                              return Card(
-                                color: Colors.grey[900],
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    course['image'] != ''
-                                        ? ClipRRect(
-                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                            child: Image.network(
-                                              course['image'],
-                                              height: 120,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        : const Icon(Icons.image_not_supported, size: 120, color: Colors.white70),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            course['title'],
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            course['description'],
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(color: Colors.white70, fontSize: 12),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Row(
-                                            children: [
-                                              buildStarRating(rating),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                "$rating ($reviewsCount)",
-                                                style: const TextStyle(color: Colors.white70, fontSize: 12),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            "Price: ${course['price']}",
-                                            style: const TextStyle(color: Colors.purpleAccent, fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
+    return GestureDetector(
+      onTap: () {
+        // التنقل لصفحة CourseDetailsScreen مع تمرير بيانات الكورس
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CourseDetailsScreen(courseData: course),
+          ),
+        );
+      },
+      child: Card(
+        color: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        clipBehavior: Clip.antiAlias, // لمنع أي محتوى من التجاوز
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            course['image'] != ''
+                ? ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    child: Image.network(
+                      course['image'],
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.image_not_supported,
+                        size: 120,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  )
+                : const Icon(Icons.image_not_supported, size: 120, color: Colors.white70),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    course['title'],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    course['description'],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      buildStarRating(rating),
+                      const SizedBox(width: 6),
+                      Text(
+                        "$rating ($reviewsCount)",
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Price: ${course['price']}",
+                    style: const TextStyle(color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+);
+                       
+                       
                         },
                       );
                     }).toList(),
