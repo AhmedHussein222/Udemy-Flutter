@@ -27,26 +27,81 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     instructorFuture =
         FirebaseFirestore.instance.collection('Users').doc(instructorId).get();
 
-    // استخدام Future.microtask لضمان تنفيذ الدالة بعد بناء الواجهة
     Future.microtask(() => _checkWishlistStatus());
   }
 
-  Future<void> _checkWishlistStatus() async {
-    try {
-      // تأكد من وجود معرف الكورس (مع fallback إلى course_id)
-      final courseId =
-          widget.courseData['id'] ?? widget.courseData['course_id'];
+Future<void> _checkWishlistStatus() async {
+  final courseId = widget.courseData['id'] ?? widget.courseData['course_id'];
+  if (courseId == null || courseId.isEmpty) {
+    _showSnackBar('Error: Course ID is not available');
+    setState(() {
+      _isInWishlist = false;
+      _checkingWishlist = false;
+    });
+    return;
+  }
 
-      // طباعة معرف الكورس للتصحيح
-      print("Checking wishlist status for course ID: $courseId");
+  try {
+    final isInWishlist = await _wishlistService.isInWishlist(courseId);
+    if (mounted) {
+      setState(() {
+        _isInWishlist = isInWishlist;
+        _checkingWishlist = false;
+      });
+    }
+  } catch (e) {
+    _showSnackBar('Error checking wishlist: $e');
+    if (mounted) {
+      setState(() {
+        _checkingWishlist = false;
+      });
+    }
+  }
+}
+
+Future<void> _toggleWishlist() async {
+  final courseId = widget.courseData['id'] ?? widget.courseData['course_id'];
+  if (courseId == null || courseId.isEmpty) {
+    _showSnackBar('Error: Course ID is not available');
+    return;
+  }
+
+  try {
+    final success = await _wishlistService.toggleWishlist(courseId);
+    if (mounted) {
+      setState(() {
+        _isInWishlist = !_isInWishlist;
+      });
+    }
+    _showSnackBar(
+      success
+          ? (_isInWishlist ? 'Course added to wishlist' : 'Course removed from wishlist')
+          : 'Failed to update wishlist',
+      success ? Colors.purple : Colors.red,
+    );
+  } catch (e) {
+    _showSnackBar('Error toggling wishlist: $e');
+  }
+}
+
+void _showSnackBar(String message, [Color backgroundColor = Colors.red]) {
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+}
+
+  Future<void> _addToCart() async {
+    try {
+      final course = widget.courseData;
+      final courseId = course['id']?.toString() ?? course['course_id']?.toString();
 
       if (courseId == null || courseId.isEmpty) {
-        print("Course ID is null or empty, cannot check wishlist status");
         if (mounted) {
-          setState(() {
-            _isInWishlist = false;
-            _checkingWishlist = false;
-          });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Error: Course ID is not available'),
@@ -57,87 +112,58 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         return;
       }
 
-      final isInWishlist = await _wishlistService.isInWishlist(courseId);
-
-      if (mounted) {
-        setState(() {
-          _isInWishlist = isInWishlist;
-          _checkingWishlist = false;
-        });
-      }
-    } catch (e) {
-      print("Error checking wishlist status: $e");
-      if (mounted) {
-        setState(() {
-          _checkingWishlist = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error checking wishlist: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _toggleWishlist() async {
-    try {
-      // تأكد من وجود معرف الكورس (مع fallback إلى course_id)
-      final courseId =
-          widget.courseData['id'] ?? widget.courseData['course_id'];
-
-      if (courseId == null || courseId.isEmpty) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Error: Course ID is not available'),
-              backgroundColor: Colors.red,
-            ),
+            const SnackBar(content: Text('Please login first')),
+            // backgroundColor: Colors.red,
           );
         }
         return;
       }
+     final userId = user.uid;
 
-      bool success;
-      String message;
+                            final cartItemRef = FirebaseFirestore.instance
+                                .collection('Carts')
+                                .doc(userId)
+                                .collection('items')
+                                .doc(courseId);
 
-      if (_isInWishlist) {
-        success = await _wishlistService.removeFromWishlist(courseId);
-        message =
-            success
-                ? 'Course removed from wishlist'
-                : 'Failed to remove course from wishlist';
-      } else {
-        success = await _wishlistService.addToWishlist(courseId);
-        message =
-            success
-                ? 'Course added to wishlist'
-                : 'Failed to add course to wishlist';
-      }
+                            final existingDoc = await cartItemRef.get();
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: success ? Colors.purple : Colors.red,
-          ),
-        );
-        if (success) {
-          setState(() {
-            _isInWishlist = !_isInWishlist;
-          });
-        }
-      }
-    } catch (e) {
-      print("Error toggling wishlist: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
-  }
+                            if (!existingDoc.exists) {
+                              await cartItemRef.set({
+                                'course_id': courseId,
+                                'title': course['title'],
+                                'price': course['price'],
+                                'thumbnail': course['thumbnail'],
+                                'added_at': FieldValue.serverTimestamp(),
+                                
+                              });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Added to cart')),
+                              );
+
+                              // الانتقال لصفحة الـ Cart
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const CartScreen()),
+                              );
+
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Course already in cart')),
+                              );
+                            }
+                          } catch (e) {
+                            print('Error adding to cart: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Something went wrong')),
+                            );
+                          }
+                        }
 
   Widget _buildStarRating(double rating) {
     return Row(
@@ -184,10 +210,17 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 Stack(
                   children: [
                     Image.network(
-                      widget.courseData['thumbnail'],
+                      widget.courseData['thumbnail'] ??
+                          'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: 200,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 200,
+                      ),
                     ),
                     Positioned(
                       top: 2,
@@ -205,7 +238,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
                 Text(
                   widget.courseData['title'],
@@ -223,7 +255,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _buildStarRating(widget.courseData['rating']['rate']?.toDouble() ?? 0.0),
+                    _buildStarRating(
+                        widget.courseData['rating']['rate']?.toDouble() ?? 0.0),
                     const SizedBox(width: 8),
                     Text(
                       '${widget.courseData['rating']['rate']?.toStringAsFixed(1) ?? '0.0'} (${widget.courseData['rating']['count'] ?? 0} reviews)',
@@ -255,7 +288,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                       style: const TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     const SizedBox(width: 10),
-                    if (widget.courseData['discount'] != null && widget.courseData['discount'] > 0)
+                    if (widget.courseData['discount'] != null &&
+                        widget.courseData['discount'] > 0)
                       Text(
                         '\$${widget.courseData['discount'].toString()}',
                         style: const TextStyle(
@@ -285,99 +319,42 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                           shape: RoundedRectangleBorder(),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child:
-                            _checkingWishlist
-                                ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      _isInWishlist
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color:
-                                          _isInWishlist
-                                              ? Colors.red
-                                              : Colors.white,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _isInWishlist
-                                          ? "Remove from Wishlist"
-                                          : "Add to Wishlist",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
+                        child: _checkingWishlist
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
                                 ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    _isInWishlist
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: _isInWishlist ? Colors.red : Colors.white,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _isInWishlist
+                                        ? "Remove from Wishlist"
+                                        : "Add to Wishlist",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextButton(
-                        onPressed: () async {
-                          try {
-                            final course = widget.courseData;
-                            final courseId = course['id'].toString();
-
-                            final user = FirebaseAuth.instance.currentUser;
-                            if (user == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Please login first')),
-                              );
-                              return;
-                            }
-
-                            final userId = user.uid;
-
-                            final cartItemRef = FirebaseFirestore.instance
-                                .collection('Cart')
-                                .doc(userId)
-                                .collection('Items')
-                                .doc(courseId);
-
-                            final existingDoc = await cartItemRef.get();
-
-                            if (!existingDoc.exists) {
-                              await cartItemRef.set({
-                                'course_id': courseId,
-                                'title': course['title'],
-                                'price': course['price'],
-                                'thumbnail': course['thumbnail'],
-                                'added_at': FieldValue.serverTimestamp(),
-                              });
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Added to cart')),
-                              );
-
-                              // الانتقال لصفحة الـ Cart
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const CartScreen()),
-                              );
-
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Course already in cart')),
-                              );
-                            }
-                          } catch (e) {
-                            print('Error adding to cart: $e');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Something went wrong')),
-                            );
-                          }
-                        },
+                        onPressed: _addToCart,
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.black,
                           side: const BorderSide(color: Colors.white),
@@ -419,7 +396,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
                 const Text(
                   "Requirements",
@@ -447,7 +423,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 10),
                 const Text(
                   "Instructor",

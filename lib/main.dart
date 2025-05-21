@@ -6,6 +6,9 @@ import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 // import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
 // import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 import 'firebase_options.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 
 void main() async {
 
@@ -24,14 +27,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+   localizationsDelegates: [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+
+  ],
+  supportedLocales: [
+    Locale('en', ''), // English
+    Locale('ar', ''), // Arabic
+
+  ],
+  locale: Locale('en'),
+      theme: ThemeData(
+        // textDirection: TextDirection.rtl,
+        primarySwatch: Colors.blue,
+      ),
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false, 
-      theme: ThemeData(
-      ),
       home: SplashScreen(),
-       routes: {
-    '/feature': (context) => FeatureScreen(), // غيري الاسم حسب اسم الصفحة اللي عندك
-  },
+
+  
       // home: CartScreen()
       // home: MyLearningScreen()
     );

@@ -1,8 +1,16 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udemyflutter/Screens/login/login.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({Key? key}) : super(key: key);
@@ -15,7 +23,7 @@ class _AccountScreenState extends State<AccountScreen> {
   final user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic>? userData;
   String selectedSection = 'home';
-  bool isLoading = true;
+
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -28,14 +36,32 @@ class _AccountScreenState extends State<AccountScreen> {
   final _linkedinController = TextEditingController();
   final _youtubeController = TextEditingController();
   final _instagramController = TextEditingController();
+  //  File? _selectedImage;
+  bool isLoading = false;
+  final User = FirebaseAuth.instance.currentUser;
+
+  // Future<void> _pickImage() async {
+  //   final picker = ImagePicker();
+  //   final picked = await picker.pickImage(source: ImageSource.gallery);
+  //   if (picked != null) {
+  //     setState(() {
+  //       _selectedImage = File(picked.path);
+  //     });
+  //   }
+  // }
 
   List<String> genderOptions = ['male', 'female'];
   String _selectedGender = 'male';
+  XFile? _selectedImage;
+  // bool isLoading = false;
+  String? _profilePictureUrl; // لتخزين رابط صورة الملف الشخصي من Firestore
+  // final user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
+    _fetchProfilePicture();
   }
 
   Future<void> _fetchUserData() async {
@@ -142,26 +168,88 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _fetchProfilePicture() async {
+    if (user != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('Users').doc(user!.uid).get();
+        if (doc.exists && doc.data() != null) {
+          setState(() {
+            _profilePictureUrl = doc.data()!['profile_picture'] as String?;
+          });
+        }
+      } catch (e) {
+        _showSnackBar('Error fetching profile picture: $e', Colors.red);
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        _selectedImage = picked;
+      });
+    }
+  }
+
   Future<void> _saveImageProfile() async {
-    setState(() => isLoading = true);
-    final imageUrl = _imageUrlController.text.trim();
-    if (imageUrl.isEmpty || !Uri.parse(imageUrl).isAbsolute) {
-      _showSnackBar('Please enter a valid image URL.', Colors.red);
-      setState(() => isLoading = false);
+    if (_selectedImage == null) {
+      _showSnackBar('Please select an image first.', Colors.red);
       return;
     }
 
-    try {
-      await FirebaseFirestore.instance.collection('Users').doc(user!.uid).set({
-        'profile_picture': imageUrl,
-      }, SetOptions(merge: true));
-      await _fetchUserData();
-      _showSnackBar('Profile image updated.', Colors.green);
-    } catch (e) {
-      _showSnackBar('Error updating image: $e', Colors.red);
+    if (user == null) {
+      _showSnackBar('User not logged in.', Colors.red);
+      return;
     }
+
+    setState(() => isLoading = true);
+
+    try {
+      final cloudName = 'dimwxding';
+      final uploadPreset = 'flutter_upload';
+
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(_selectedImage!.path),
+        'upload_preset': uploadPreset,
+      });
+
+      Dio dio = Dio();
+      dio.options.connectTimeout = Duration(seconds: 10);
+      dio.options.receiveTimeout = Duration(seconds: 15);
+
+      final response = await dio.post(url.toString(), data: formData);
+
+      if (response.statusCode == 200 && response.data['secure_url'] != null) {
+        final imageUrl = response.data['secure_url'];
+
+        await FirebaseFirestore.instance.collection('Users').doc(user!.uid).set({
+          'profile_picture': imageUrl,
+        }, SetOptions(merge: true));
+
+        setState(() {
+          _profilePictureUrl = imageUrl; 
+        });
+
+        _showSnackBar('Profile image updated.', Colors.green);
+      } else {
+        _showSnackBar('Upload failed. Please try again.', Colors.red);
+      }
+    } catch (e) {
+      _showSnackBar('Error: $e', Colors.red);
+    }
+
     setState(() => isLoading = false);
   }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
+  }
+
 
   Future<void> _deleteAccount() async {
     final confirm = await showDialog<bool>(
@@ -194,18 +282,18 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-        elevation: 6,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-  }
+  // void _showSnackBar(String message, Color color) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //       content: Text(message),
+  //       backgroundColor: color,
+  //       behavior: SnackBarBehavior.floating,
+  //       margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
+  //       elevation: 6,
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //     ),
+  //   );
+  // }
 
   Widget buildSectionContent() {
     if (isLoading) {
@@ -553,57 +641,82 @@ class _AccountScreenState extends State<AccountScreen> {
         );
 
       case 'image_profile':
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundImage: _imageUrlController.text.isNotEmpty
-                    ? NetworkImage(_imageUrlController.text)
-                    : const AssetImage('assets/default_avatar.png')
-                        as ImageProvider,
-                onBackgroundImageError: (_, __) {
-                  print('Image load error');
-                },
-                child: _imageUrlController.text.isNotEmpty
-                    ? null
-                    : const Icon(Icons.person, size: 50, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _imageUrlController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Profile Picture URL',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+        return Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+  
+    const Text(
+      'Select an image from your gallery.',
+      style: TextStyle(color: Colors.white70),
+    ),
+    const SizedBox(height: 16),
+    _selectedImage != null
+        ? FutureBuilder<Uint8List>(
+            future: _selectedImage!.readAsBytes(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Image.memory(
+                  snapshot.data!,
+                  height: 150,
+                  fit: BoxFit.cover,
+                );
+              } else if (snapshot.hasError) {
+                return const Text(
+                  'Error loading image.',
+                  style: TextStyle(color: Colors.white),
+                );
+              }
+              return const CircularProgressIndicator();
+            },
+          )
+        : _profilePictureUrl != null
+            ? Image.network(
+                _profilePictureUrl!,
+                height: 150,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Image.asset(
+                  'assets/Images/defaultt.png',
+                  height: 150,
+                  fit: BoxFit.cover,
                 ),
+              )
+            : Image.asset(
+                'assets/Images/defaultt.png',
+                height: 150,
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _saveImageProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 137, 52, 216),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                  child: const Text('Save Image', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-            ],
-          ),
-        );
-
+    const SizedBox(height: 16), 
+    Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: ElevatedButton(
+        onPressed: _pickImage,
+        style: ElevatedButton.styleFrom(
+          backgroundColor:  const Color.fromARGB(255, 98, 22, 190) ,
+          foregroundColor: Colors.white, 
+        ),
+        child: const Text(
+          'Pick Image',
+          style: TextStyle(fontSize: 16, color: Colors.white),
+        ),
+      ),
+    ),
+    const SizedBox(height: 8), 
+    ElevatedButton(
+      onPressed: _selectedImage != null && !isLoading ? _saveImageProfile : null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 98, 22, 190), 
+        foregroundColor: Colors.white,
+      ),
+      child: isLoading
+          ? const CircularProgressIndicator(color: Colors.white)
+          : const Text(
+              'Upload',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+    ),
+  ],
+);
       case 'delete_account':
         return Padding(
           padding: const EdgeInsets.all(16),

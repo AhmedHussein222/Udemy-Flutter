@@ -79,8 +79,9 @@ class _SignUpPageState extends State<SignUpPage> {
               children: [
                 Center(
                   child: Image.asset(
-                    'assets/Images/value-prop-inspire-2x-v3.webp',
-                    height: 150,
+                    'assets/Images/splash.webp',
+                      height: 200,
+                        width: 200,
                   ),
                 ),
                 const SizedBox(height: 30),
