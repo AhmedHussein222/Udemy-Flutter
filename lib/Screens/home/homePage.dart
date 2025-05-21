@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           pages[screenIndex],
           Positioned(
-            top: 0,
+            top: 40,
             right: 1,
             child: IconButton(
               icon: const Icon(Icons.shopping_cart_rounded, color: Colors.white),

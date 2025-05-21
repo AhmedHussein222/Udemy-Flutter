@@ -6,6 +6,7 @@ import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 // import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
 // import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 import 'firebase_options.dart';
+import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 
 void main() async {
 
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
       home: SplashScreen(),
        routes: {
     '/feature': (context) => FeatureScreen(), // غيري الاسم حسب اسم الصفحة اللي عندك
+    '/checkout': (context) => CheckoutPage(), // غيري الاسم حسب اسم الصفحة اللي عندك
   },
       // home: CartScreen()
       // home: MyLearningScreen()
