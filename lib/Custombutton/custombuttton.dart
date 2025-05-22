@@ -10,6 +10,7 @@ class CustomButton extends StatefulWidget {
   final Image? image;
   final VoidCallback? onPressed;
   final bool isOutlined;
+  final double? fontSize;
 
   const CustomButton({
     super.key,
@@ -22,6 +23,7 @@ class CustomButton extends StatefulWidget {
     this.image,
     this.onPressed,
     this.isOutlined = false,
+    this.fontSize,
   });
 
   @override
@@ -83,7 +85,7 @@ class _CustomButtonState extends State<CustomButton> {
                 foregroundColor: widget.textColor,
                 minimumSize: hasText
                     ? const Size(double.infinity, 60)
-                    : const Size(60, 60),
+                    : const Size(70, 70),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(
@@ -91,7 +93,8 @@ class _CustomButtonState extends State<CustomButton> {
                     width: widget.borderWidth ?? 1,
                   ),
                 ),
-                textStyle: const TextStyle(fontSize: 18),
+                textStyle:  TextStyle(fontSize: widget.fontSize ?? 10),
+
               ),
               child: content,
             ),

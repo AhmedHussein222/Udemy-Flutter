@@ -10,6 +10,8 @@ import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 
 import 'firebase_options.dart';
 
+import 'package:udemyflutter/generated/l10n.dart';
+import 'package:intl/intl.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -22,16 +24,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+       title: 'Udemy-App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       locale: Locale('en'),
       localizationsDelegates: [
+      S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en', ''), Locale('ar', '')],
+      
+       supportedLocales: S.delegate.supportedLocales,
+
+      
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -69,4 +75,8 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+bool isArabic()
+{
+  return Intl.getCurrentLocale() == 'ar';
 }

@@ -140,14 +140,14 @@ Future<void> _addToCart() async {
     }
 
  
-    final courseData = {
-      'course_id': courseId,
-      'title': course['title'] ?? 'No Title',
-      'price': course['price'] ?? 0,
-      'thumbnail': course['thumbnail'] ?? '',
-      'description': course['description'] ?? '',
-      'discount': course['discount'] ?? 0,
-    };
+final courseData = {
+  'course_id': courseId,
+  'title': course['title'] ?? 'No Title',
+  'price': course['price'] ?? 0,
+  'thumbnail': course['thumbnail'] ?? '',
+  'description': course['description'] ?? '',
+  'discount': course['discount'] ?? 0,
+};
 
 
     await cartRef.set({

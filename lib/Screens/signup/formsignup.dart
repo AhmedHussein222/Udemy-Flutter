@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/login/login.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -67,91 +68,92 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 40),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Center(
-                  child: Image.asset(
-                    'assets/Images/splash.webp',
-                      height: 200,
-                        width: 200,
-                  ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 40),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/Images/splash.webp',
+                  height: 200,
+                  width: 200,
                 ),
-                const SizedBox(height: 30),
-                const Text(
-                  'Sign up with email',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              const SizedBox(height: 30),
+              Text(
+                S.of(context).signupWithEmail,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  "We'll email you a code for secure signup",
-                  style: TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 30),
-                _buildTextField(_firstNameController, "First Name"),
-                const SizedBox(height: 10),
-                _buildTextField(_lastNameController, "Last Name"),
-                const SizedBox(height: 10),
-                _buildTextField(_emailController, "Email", isEmail: true),
-                const SizedBox(height: 10),
-                _buildTextField(_passwordController, "Password", isPassword: true),
-                const SizedBox(height: 30),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _signUp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurpleAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                S.of(context).signupSubtitle,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 30),
+              _buildTextField(_firstNameController, S.of(context).firstName),
+              const SizedBox(height: 10),
+              _buildTextField(_lastNameController, S.of(context).lastName),
+              const SizedBox(height: 10),
+              _buildTextField(_emailController, S.of(context).Email, isEmail: true),
+              const SizedBox(height: 10),
+              _buildTextField(_passwordController, S.of(context).Password, isPassword: true),
+              const SizedBox(height: 30),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurpleAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                      ),
+                      child: Text(
+                        S.of(context).continueText,
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
+                child: RichText(
+                  text: TextSpan(
+                    text: S.of(context).alreadyHaveAccount,
+                    style: const TextStyle(color: Colors.white70),
+                    children: [
+                      TextSpan(
+                        text: " ${S.of(context).Login}",
+                        style: const TextStyle(
+                          color: Colors.deepPurpleAccent,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                   Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    );
-                  },
-                  child: RichText(
-                    text: const TextSpan(
-                      text: "Already have an account? ",
-                      style: TextStyle(color: Colors.white70),
-                      children: [
-                        TextSpan(
-                          text: "Log in",
-                          style: TextStyle(
-                            color: Colors.deepPurpleAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
+ 
   Widget _buildTextField(TextEditingController controller, String hintText,
       {bool isEmail = false, bool isPassword = false}) {
     return TextFormField(

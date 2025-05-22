@@ -5,7 +5,7 @@ import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({Key? key}) : super(key: key);
+const CartScreen({super.key});
 
   Future<void> _checkoutItem(
     BuildContext context,
@@ -42,9 +42,7 @@ class CartScreen extends StatelessWidget {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Payment for this course completed successfully!'),
-        ),
+        const SnackBar(content: Text('Payment for this course completed successfully!')),
       );
     }
   }
@@ -60,18 +58,11 @@ class CartScreen extends StatelessWidget {
           title: const Text("Cart", style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.black,
         ),
-        body: const Center(
-          child: Text(
-            "Please login first",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
+        body: const Center(child: Text("Please login first", style: TextStyle(color: Colors.white))),
       );
     }
 
-    final cartRef = FirebaseFirestore.instance
-        .collection('Carts')
-        .doc(user.uid);
+    final cartRef = FirebaseFirestore.instance.collection('Carts').doc(user.uid);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -96,33 +87,19 @@ class CartScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Your Cart is empty!",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+                    style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomeScreen()),
-                        ),
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HomeScreen())),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text(
-                      'Go Shopping',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                    child: const Text('Go Shopping', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ],
               ),
