@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/login/login.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,22 +13,10 @@ class _SplashScreenState extends State<SplashScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<Map<String, String>> splashData = [
-    {
-      "image": "assets/Images/lohp-category-business-2x-v2.webp",
-      "title": "Task Video Courses",
-      "subtitle": "From cooking to coding\nand everything in between"
-    },
-    {
-      "image": "assets/Images/value-prop-teach-2x-v3.webp",
-      "title": "Learn from the Best",
-      "subtitle": "Approachable expert-instructors, \n vetted by more than 50 million learners"
-    },
-    {
-      "image": "assets/Images/value-prop-inspire-2x-v3.webp",
-      "title": "Go at Your Own Pace",
-      "subtitle": "Lifetime access to purchased courses, \n anytime, anywhere"
-    },
+  final List<String> images = [
+    "assets/Images/lohp-category-business-2x-v2.webp",
+    "assets/Images/value-prop-teach-2x-v3.webp",
+    "assets/Images/value-prop-inspire-2x-v3.webp",
   ];
 
   @override
@@ -40,10 +29,10 @@ class _SplashScreenState extends State<SplashScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
-        splashData.length,
+        images.length,
         (index) => AnimatedContainer(
-          duration: Duration(milliseconds: 300),
-          margin: EdgeInsets.symmetric(horizontal: 4),
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
           width: _currentPage == index ? 12 : 8,
           height: _currentPage == index ? 12 : 8,
           decoration: BoxDecoration(
@@ -57,6 +46,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final titles = [
+      S.of(context).splash1,
+      S.of(context).splash2, // ضيفيها في ملف l10n.arb و en.arb
+      S.of(context).splash3, // كذلك
+    ];
+
+    final subtitles = [
+      S.of(context).splash1_subtitle,
+      S.of(context).splash2_subtitle,
+      S.of(context).splash3_subtitle,
+    ];
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(
@@ -65,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
             flex: 7,
             child: PageView.builder(
               controller: _pageController,
-              itemCount: splashData.length,
+              itemCount: images.length,
               onPageChanged: (int index) {
                 setState(() {
                   _currentPage = index;
@@ -76,25 +77,25 @@ class _SplashScreenState extends State<SplashScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
-                      splashData[index]["image"]!,
+                      images[index],
                       width: 200,
                       height: 200,
                       fit: BoxFit.cover,
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     Text(
-                      splashData[index]["title"]!,
-                      style: TextStyle(
+                      titles[index],
+                      style: const TextStyle(
                         fontSize: 22,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
-                      splashData[index]["subtitle"]!,
+                      subtitles[index],
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white70,
                       ),
@@ -104,32 +105,32 @@ class _SplashScreenState extends State<SplashScreen> {
               },
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildDots(),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: Column(
               children: [
                 ElevatedButton(
                   onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginScreen()),
-                        );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black,
-                    minimumSize: Size(double.infinity, 50),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: Text('Sign In'),
+                  child: Text(S.of(context).signin),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
               ],
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
         ],
       ),
     );

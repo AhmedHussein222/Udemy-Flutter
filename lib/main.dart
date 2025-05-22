@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-
+import 'package:intl/intl.dart';
 void main() async {
 
    WidgetsFlutterBinding.ensureInitialized();
@@ -22,22 +22,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-            // localizationsDelegates: [
-            //     S.delegate,
-            //     GlobalMaterialLocalizations.delegate,
-            //     GlobalWidgetsLocalizations.delegate,
-            //     GlobalCupertinoLocalizations.delegate,
-            // ],
-            // supportedLocales: S.delegate.supportedLocales,
+      locale: const Locale('ar'),
+            localizationsDelegates: [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
      
-      title: 'Flutter Demo',
+      title: 'Udemy-App',
       debugShowCheckedModeBanner: false, 
       home: SplashScreen(),
-
-  
-      // home: CartScreen()
-      // home: MyLearningScreen()
     );
   }
+}
+bool isArabic()
+{
+  return Intl.getCurrentLocale() == 'ar';
 }
 

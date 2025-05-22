@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udemyflutter/Screens/login/login.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 
 class AccountScreen extends StatefulWidget {
@@ -33,26 +34,15 @@ class _AccountScreenState extends State<AccountScreen> {
   final _linkedinController = TextEditingController();
   final _youtubeController = TextEditingController();
   final _instagramController = TextEditingController();
-  //  File? _selectedImage;
+
   bool isLoading = false;
   final User = FirebaseAuth.instance.currentUser;
 
-  // Future<void> _pickImage() async {
-  //   final picker = ImagePicker();
-  //   final picked = await picker.pickImage(source: ImageSource.gallery);
-  //   if (picked != null) {
-  //     setState(() {
-  //       _selectedImage = File(picked.path);
-  //     });
-  //   }
-  // }
 
   List<String> genderOptions = ['male', 'female'];
   String _selectedGender = 'male';
   XFile? _selectedImage;
-  // bool isLoading = false;
-  String? _profilePictureUrl; // لتخزين رابط صورة الملف الشخصي من Firestore
-  // final user = FirebaseAuth.instance.currentUser;
+  String? _profilePictureUrl; 
 
   @override
   void initState() {
@@ -141,6 +131,8 @@ class _AccountScreenState extends State<AccountScreen> {
     }
     setState(() => isLoading = false);
   }
+
+
 
   Future<void> _changePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
@@ -241,6 +233,8 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() => isLoading = false);
   }
 
+
+
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: color),
@@ -279,528 +273,554 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  // void _showSnackBar(String message, Color color) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text(message),
-  //       backgroundColor: color,
-  //       behavior: SnackBarBehavior.floating,
-  //       margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-  //       elevation: 6,
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //     ),
-  //   );
-  // }
+//  void _showSnackBar(String messageKey, Color color, {String? error}) {
+//   String message = error != null
+//       ? S.of(context).formatString(messageKey, {'error': error})
+//       : S.of(context).$messageKey;
+//   ScaffoldMessenger.of(context).showSnackBar(
+//     SnackBar(content: Text(message), backgroundColor: color),
+//   );
+// }
 
-  Widget buildSectionContent() {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.white));
-    }
-    switch (selectedSection) {
-      case 'home':
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: CircleAvatar(
-  key: ValueKey(_imageUrlController.text), 
-  radius: 50,
-  backgroundImage: _imageUrlController.text.isNotEmpty
-      ? NetworkImage(_imageUrlController.text)
-      : const AssetImage('assets/default_avatar.png') as ImageProvider,
-  onBackgroundImageError: (_, __) {
-    print('Image load error');
-  },
-  child: _imageUrlController.text.isNotEmpty
-      ? null
-      : const Icon(Icons.person, size: 50, color: Colors.grey),
-),
+Widget buildSectionContent() {
+  if (isLoading) {
+    return const Center(child: CircularProgressIndicator(color: Colors.white));
+  }
+  switch (selectedSection) {
+    case 'home':
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: CircleAvatar(
+                key: ValueKey(_imageUrlController.text),
+                radius: 50,
+                backgroundImage: _imageUrlController.text.isNotEmpty
+                    ? NetworkImage(_imageUrlController.text)
+                    : const AssetImage('assets/default_avatar.png')
+                        as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  print('Image load error');
+                },
+                child: _imageUrlController.text.isNotEmpty
+                    ? null
+                    : const Icon(Icons.person, size: 50, color: Colors.grey),
               ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  '${_firstNameController.text} ${_lastNameController.text}',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold),
-                ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                '${_firstNameController.text} ${_lastNameController.text}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.email, color: Colors.white70, size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      user?.email ?? '',
-                      style: const TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.email, color: Colors.white70, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    user?.email ?? '',
+                    style: const TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '${S.of(context).gender}: ${_selectedGender[0].toUpperCase()}${_selectedGender.substring(1)}',
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              S.of(context).bio,
+              style: const TextStyle(color: Colors.white),
+            ),
+            Text(
+              _bioController.text.isEmpty
+                  ? S.of(context).noBioProvided
+                  : _bioController.text,
+              style: const TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 8),
+            if (_facebookController.text.isNotEmpty) ...[
               Text(
-                'Gender: ${_selectedGender[0].toUpperCase()}${_selectedGender.substring(1)}',
+                S.of(context).facebook,
                 style: const TextStyle(color: Colors.white),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Bio:',
-                style: TextStyle(color: Colors.white),
-              ),
               Text(
-                _bioController.text.isEmpty ? 'No bio provided' : _bioController.text,
+                _facebookController.text,
                 style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 8),
-              if (_facebookController.text.isNotEmpty) ...[
-                const Text(
-                  'Facebook:',
-                  style: TextStyle(color: Colors.white),
-                ),
-                Text(
-                  _facebookController.text,
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (_linkedinController.text.isNotEmpty) ...[
-                const Text(
-                  'LinkedIn:',
-                  style: TextStyle(color: Colors.white),
-                ),
-                Text(
-                  _linkedinController.text,
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (_youtubeController.text.isNotEmpty) ...[
-                const Text(
-                  'YouTube:',
-                  style: TextStyle(color: Colors.white),
-                ),
-                Text(
-                  _youtubeController.text,
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (_instagramController.text.isNotEmpty) ...[
-                const Text(
-                  'Instagram:',
-                  style: TextStyle(color: Colors.white),
-                ),
-                Text(
-                  _instagramController.text,
-                  style: const TextStyle(color: Colors.white70),
-                ),
-              ],
             ],
-          ),
-        );
-
-      case 'profile':
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _firstNameController,
+            if (_linkedinController.text.isNotEmpty) ...[
+              Text(
+                S.of(context).linkedin,
                 style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'First Name',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _lastNameController,
+              Text(
+                _linkedinController.text,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (_youtubeController.text.isNotEmpty) ...[
+              Text(
+                S.of(context).youtube,
                 style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Last Name',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
               ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _selectedGender,
-                dropdownColor: Colors.grey[900],
+              Text(
+                _youtubeController.text,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (_instagramController.text.isNotEmpty) ...[
+              Text(
+                S.of(context).instagram,
                 style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Gender',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                items: genderOptions
-                    .map((g) => DropdownMenuItem(
-                          value: g,
-                          child: Text(g[0].toUpperCase() + g.substring(1),
-                              style: const TextStyle(color: Colors.white)),
-                        ))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedGender = v!),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _bioController,
-                style: const TextStyle(color: Colors.white),
-                maxLines: 3,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Bio',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _facebookController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Facebook URL',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: const Icon(Icons.facebook, color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _linkedinController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'LinkedIn URL',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: const Icon(Icons.link, color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _youtubeController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'YouTube URL',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: const Icon(Icons.videocam, color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _instagramController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Instagram URL',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: const Icon(Icons.camera_alt, color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 137, 52, 216),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                  child: const Text('Save Profile', style: TextStyle(fontSize: 16)),
-                ),
+              Text(
+                _instagramController.text,
+                style: const TextStyle(color: Colors.white70),
               ),
             ],
-          ),
-        );
-
-      case 'change_password':
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              TextField(
-                controller: _currentPasswordController,
-                style: const TextStyle(color: Colors.white),
-                obscureText: true,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Current Password',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _newPasswordController,
-                style: const TextStyle(color: Colors.white),
-                obscureText: true,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'New Password',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _confirmPasswordController,
-                style: const TextStyle(color: Colors.white),
-                obscureText: true,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  labelText: 'Confirm Password',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _changePassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 137, 52, 216),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                  child: const Text('Change Password', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-            ],
-          ),
-        );
-
-      case 'image_profile':
-        return Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-  
-    const Text(
-      'Select an image from your gallery.',
-      style: TextStyle(color: Colors.white70),
-    ),
-    const SizedBox(height: 16),
-    _selectedImage != null
-        ? FutureBuilder<Uint8List>(
-            future: _selectedImage!.readAsBytes(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Image.memory(
-                  snapshot.data!,
-                  height: 150,
-                  fit: BoxFit.cover,
-                );
-              } else if (snapshot.hasError) {
-                return const Text(
-                  'Error loading image.',
-                  style: TextStyle(color: Colors.white),
-                );
-              }
-              return const CircularProgressIndicator();
-            },
-          )
-        : _profilePictureUrl != null
-            ? Image.network(
-                _profilePictureUrl!,
-                height: 150,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Image.asset(
-                  'assets/Images/defaultt.png',
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
-              )
-            : Image.asset(
-                'assets/Images/defaultt.png',
-                height: 150,
-                fit: BoxFit.cover,
-              ),
-    const SizedBox(height: 16), 
-    Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: ElevatedButton(
-        onPressed: _pickImage,
-        style: ElevatedButton.styleFrom(
-          backgroundColor:  const Color.fromARGB(255, 98, 22, 190) ,
-          foregroundColor: Colors.white, 
+          ],
         ),
-        child: const Text(
-          'Pick Image',
-          style: TextStyle(fontSize: 16, color: Colors.white),
-        ),
-      ),
-    ),
-    const SizedBox(height: 8), 
-    ElevatedButton(
-      onPressed: _selectedImage != null && !isLoading ? _saveImageProfile : null,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 98, 22, 190), 
-        foregroundColor: Colors.white,
-      ),
-      child: isLoading
-          ? const CircularProgressIndicator(color: Colors.white)
-          : const Text(
-              'Upload',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+      );
+
+    case 'profile':
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _firstNameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).firstName,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
-    ),
-  ],
-);
-      case 'delete_account':
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Permanently delete your account?',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _lastNameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).lastName,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _deleteAccount,
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _selectedGender,
+              dropdownColor: Colors.grey[900],
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).gender,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              items: genderOptions
+                  .map((g) => DropdownMenuItem(
+                        value: g,
+                        child: Text(
+                            g[0].toUpperCase() + g.substring(1),
+                            style: const TextStyle(color: Colors.white)),
+                      ))
+                  .toList(),
+              onChanged: (v) => setState(() => _selectedGender = v!),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _bioController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 3,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).bioField,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _facebookController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).facebookUrl,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                prefixIcon: const Icon(Icons.facebook, color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              keyboardType: TextInputType.url,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _linkedinController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).linkedinUrl,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                prefixIcon: const Icon(Icons.link, color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              keyboardType: TextInputType.url,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _youtubeController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).youtubeUrl,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                prefixIcon: const Icon(Icons.videocam, color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              keyboardType: TextInputType.url,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _instagramController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).instagramUrl,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                prefixIcon: const Icon(Icons.camera_alt, color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              keyboardType: TextInputType.url,
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: _saveProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: const Color.fromARGB(255, 137, 52, 216),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                child: const Text('Delete Account', style: TextStyle(fontSize: 16)),
+                child: Text(S.of(context).saveProfile,
+                    style: const TextStyle(fontSize: 16)),
               ),
-            ],
-          ),
-        );
+            ),
+          ],
+        ),
+      );
 
-      default:
-        return const SizedBox.shrink();
-    }
-  }
+    case 'change_password':
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: _currentPasswordController,
+              style: const TextStyle(color: Colors.white),
+              obscureText: true,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).currentPassword,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _newPasswordController,
+              style: const TextStyle(color: Colors.white),
+              obscureText: true,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).newPassword,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _confirmPasswordController,
+              style: const TextStyle(color: Colors.white),
+              obscureText: true,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                labelText: S.of(context).confirmPassword,
+                labelStyle: TextStyle(color: Colors.grey[400]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: _changePassword,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 137, 52, 216),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: Text(S.of(context).changePassword,
+                    style: const TextStyle(fontSize: 16)),
+              ),
+            ),
+          ],
+        ),
+      );
 
-  Widget buildDrawer() {
-    return Drawer(
-      backgroundColor: Colors.black,
-      child: ListView(
-        padding: EdgeInsets.zero,
+    case 'image_profile':
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(color: Colors.black),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: _imageUrlController.text.isNotEmpty
-                  ? NetworkImage(_imageUrlController.text)
-                  : const AssetImage('assets/default_avatar.png')
-                      as ImageProvider,
-              onBackgroundImageError: (_, __) {
-                print('Image load error');
-              },
-              child: _imageUrlController.text.isNotEmpty
-                  ? null
-                  : const Icon(Icons.person, size: 50, color: Colors.grey),
-            ),
-            accountName: Text(
-              '${_firstNameController.text} ${_lastNameController.text}',
-              style: const TextStyle(
-                  color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-            accountEmail: Text(
-              user?.email ?? '',
-              style: const TextStyle(color: Colors.white70),
+          Text(
+            S.of(context).selectImage,
+            style: const TextStyle(color: Colors.white70),
+          ),
+          const SizedBox(height: 16),
+          _selectedImage != null
+              ? FutureBuilder<Uint8List>(
+                  future: _selectedImage!.readAsBytes(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Image.memory(
+                        snapshot.data!,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Text(
+                        'Error loading image.',
+                        style: TextStyle(color: Colors.white),
+                      );
+                    }
+                    return const CircularProgressIndicator();
+                  },
+                )
+              : _profilePictureUrl != null
+                  ? Image.network(
+                      _profilePictureUrl!,
+                      height: 150,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                        'assets/Images/defaultt.png',
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/Images/defaultt.png',
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: ElevatedButton(
+              onPressed: _pickImage,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 98, 22, 190),
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                S.of(context).pickImage,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
             ),
           ),
-          buildDrawerTile(Icons.home, 'Home', 'home'),
-          buildDrawerTile(Icons.person, 'Edit Profile', 'profile'),
-          buildDrawerTile(Icons.lock, 'Change Password', 'change_password'),
-          buildDrawerTile(Icons.image, 'Change Profile Image', 'image_profile'),
-          buildDrawerTile(Icons.delete_forever, 'Delete Account', 'delete_account',
-              color: Colors.red),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Log out', style: TextStyle(color: Colors.red)),
-            hoverColor: Colors.transparent,
-            splashColor: Colors.transparent,
-            onTap: () async {
-              Navigator.pop(context);
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SplashScreen()),
-              );
-            },
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: _selectedImage != null && !isLoading
+                ? _saveImageProfile
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 98, 22, 190),
+              foregroundColor: Colors.white,
+            ),
+            child: isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : Text(
+                    S.of(context).upload,
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
+                  ),
           ),
         ],
-      ),
-    );
-  }
+      );
+    case 'delete_account':
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              S.of(context).deleteAccountConfirm,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _deleteAccount,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: Text(S.of(context).deleteAccount,
+                  style: const TextStyle(fontSize: 16)),
+            ),
+          ],
+        ),
+      );
 
+    default:
+      return const SizedBox.shrink();
+  }
+}
+
+Widget buildDrawer() {
+  return Drawer(
+    backgroundColor: Colors.black,
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        UserAccountsDrawerHeader(
+          decoration: const BoxDecoration(color: Colors.black),
+          currentAccountPicture: CircleAvatar(
+            backgroundImage: _imageUrlController.text.isNotEmpty
+                ? NetworkImage(_imageUrlController.text)
+                : const AssetImage('assets/default_avatar.png') as ImageProvider,
+            onBackgroundImageError: (_, __) {
+              print('Image load error');
+            },
+            child: _imageUrlController.text.isNotEmpty
+                ? null
+                : const Icon(Icons.person, size: 50, color: Colors.grey),
+          ),
+          accountName: Text(
+            '${_firstNameController.text} ${_lastNameController.text}',
+            style: const TextStyle(
+                color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+          accountEmail: Text(
+            user?.email ?? '',
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ),
+        buildDrawerTile(Icons.home, S.of(context).home, 'home'),
+        buildDrawerTile(Icons.person, S.of(context).editProfile, 'profile'),
+        buildDrawerTile(
+            Icons.lock, S.of(context).changePassword, 'change_password'),
+        buildDrawerTile(
+            Icons.image, S.of(context).changeProfileImage, 'image_profile'),
+        buildDrawerTile(
+            Icons.delete_forever, S.of(context).deleteAccount, 'delete_account',
+            color: Colors.red),
+        ListTile(
+          leading: const Icon(Icons.language, color: Colors.white),
+          title: Text(
+            S.of(context).switchLanguage,
+            style: const TextStyle(color: Colors.white),
+          ),
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: () {
+            Navigator.pop(context);
+            _switchLanguage(context);
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.logout, color: Colors.red),
+          title: Text(
+            S.of(context).logout,
+            style: const TextStyle(color: Colors.red),
+          ),
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: () async {
+            Navigator.pop(context);
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => SplashScreen()),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+}
   Widget buildDrawerTile(IconData icon, String title, String section,
       {Color? color}) {
     return ListTile(
@@ -843,4 +863,13 @@ class _AccountScreenState extends State<AccountScreen> {
     _instagramController.dispose();
     super.dispose();
   }
-}
+
+  void _switchLanguage(BuildContext context) {
+  final currentLocale = Localizations.localeOf(context);
+  final newLocale = currentLocale.languageCode == 'en'
+      ? const Locale('ar')
+      : const Locale('en');
+
+  setState(() {
+  });
+}}
