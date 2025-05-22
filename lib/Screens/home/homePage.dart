@@ -94,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+
       body: SafeArea(
         child: Stack(
           children: [
@@ -117,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final items = data['items'] as List<dynamic>?; 
       cartItemCount = items?.length ?? 0;
     }
+
 
     return Stack(
       alignment: Alignment.topRight,

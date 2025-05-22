@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 import 'package:udemyflutter/generated/l10n.dart';
 import 'firebase_options.dart';
+import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
 void main() async {
@@ -34,6 +35,8 @@ class MyApp extends StatelessWidget {
       title: 'Udemy-App',
       debugShowCheckedModeBanner: false, 
       home: SplashScreen(),
+
+
     );
   }
 }

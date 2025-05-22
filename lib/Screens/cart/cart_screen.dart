@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
+
 
   Future<void> _checkoutItem(BuildContext context, DocumentReference cartRef, Map<String, dynamic> item) async {
     final confirm = await showDialog<bool>(
@@ -21,9 +22,8 @@ class CartScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.purple[300]),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Yes'),
+
           ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -55,7 +55,23 @@ class CartScreen extends StatelessWidget {
     final cartRef = FirebaseFirestore.instance.collection('Carts').doc(user.uid);
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("My Cart"),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/checkout',
+                arguments: {'userId': user.uid, 'cartItemsRef': cartItemsRef},
+              );
+            },
+          ),
+        ],
+  
       backgroundColor: Colors.black,
+
       appBar: AppBar(
         title: const Text("My Cart", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
@@ -64,6 +80,7 @@ class CartScreen extends StatelessWidget {
         stream: cartRef.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -77,7 +94,9 @@ class CartScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Your Cart is empty!",
+
                     style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -155,6 +174,7 @@ class CartScreen extends StatelessWidget {
                                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
+
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
