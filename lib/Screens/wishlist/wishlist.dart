@@ -14,7 +14,7 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  late Stream<DocumentSnapshot> _wishlistStream; // عدلنا من QuerySnapshot إلى DocumentSnapshot
+  late Stream<DocumentSnapshot> _wishlistStream; // Updated to DocumentSnapshot
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final WishlistService _wishlistService = WishlistService();
   bool _isLoading = true;
@@ -83,47 +83,52 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Colors.purple),
-            )
-          : StreamBuilder<DocumentSnapshot>(
-              stream: _wishlistStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Colors.purple),
+      body:
+          _isLoading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.purple),
+              )
+              : StreamBuilder<DocumentSnapshot>(
+                stream: _wishlistStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.purple),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
+
+                  if (_auth.currentUser == null) {
+                    return _buildNotLoggedInView();
+                  }
+
+                  if (!snapshot.hasData ||
+                          !snapshot.data!.exists ||
+                          (snapshot.data!.data() as Map<String, dynamic>?) ==
+                              null ||
+                          (snapshot.data!.data()
+                                  as Map<String, dynamic>)['items']
+                              ?.isEmpty ??
+                      true) {
+                    return _buildEmptyWishlistView();
+                  }
+
+                  final wishlistItems = List<Map<String, dynamic>>.from(
+                    (snapshot.data!.data() as Map<String, dynamic>)['items'] ??
+                        [],
                   );
-                }
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  );
-                }
-
-                if (_auth.currentUser == null) {
-                  return _buildNotLoggedInView();
-                }
-
-                if (!snapshot.hasData || !snapshot.data!.exists || (snapshot.data!.data() as Map<String, dynamic>?)?.isEmpty == true) {
-                  return _buildEmptyWishlistView();
-                }
-
-                final wishlistData = snapshot.data!.data() as Map<String, dynamic>;
-                final wishlistItems = List<Map<String, dynamic>>.from(wishlistData['items'] ?? [])
-                  ..sort((a, b) {
-                    final aTimestamp = (a['addedAt'] as Timestamp?) ?? Timestamp.fromDate(DateTime(0));
-                    final bTimestamp = (b['addedAt'] as Timestamp?) ?? Timestamp.fromDate(DateTime(0));
-                    return bTimestamp.compareTo(aTimestamp);
-                  });
-
-                return _buildWishlistItems(wishlistItems);
-              },
-            ),
+                  return _buildWishlistItems(wishlistItems);
+                },
+              ),
     );
   }
 
@@ -214,9 +219,16 @@ class _WishlistScreenState extends State<WishlistScreen> {
       stream: FirebaseFirestore.instance.collection('Reviews').snapshots(),
       builder: (context, reviewsSnapshot) {
         if (reviewsSnapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Colors.purple));
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.purple),
+          );
         } else if (reviewsSnapshot.hasError) {
-          return Center(child: Text('Error: ${reviewsSnapshot.error}', style: const TextStyle(color: Colors.white)));
+          return Center(
+            child: Text(
+              'Error: ${reviewsSnapshot.error}',
+              style: const TextStyle(color: Colors.white),
+            ),
+          );
         }
 
         // Calculate ratings from Reviews
@@ -233,7 +245,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
         final averageRatings = <String, double>{};
         final reviewCounts = <String, int>{};
         ratingsMap.forEach((courseId, ratings) {
-          final avg = ratings.isNotEmpty ? ratings.reduce((a, b) => a + b) / ratings.length : 0.0;
+          final avg =
+              ratings.isNotEmpty
+                  ? ratings.reduce((a, b) => a + b) / ratings.length
+                  : 0.0;
           averageRatings[courseId] = avg;
           reviewCounts[courseId] = ratings.length;
         });
@@ -242,52 +257,83 @@ class _WishlistScreenState extends State<WishlistScreen> {
           padding: const EdgeInsets.all(16),
           itemCount: wishlistItems.length,
           itemBuilder: (context, index) {
-            final wishlistCourse = wishlistItems[index]; // عدلنا من wishlistItem إلى wishlistCourse
-            final courseId = wishlistCourse['id']; // استخدمنا id من الـ array
+            final wishlistCourse = wishlistItems[index];
+            final courseId = wishlistCourse['id']?.toString();
 
-            // جلب بيانات الكورس من collection الـ Courses
+            if (courseId == null) {
+              return const SizedBox.shrink(); // Skip invalid items
+            }
+
+            // Fetch course data from Courses collection
             return FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance.collection('Courses').doc(courseId).get(),
+              future:
+                  FirebaseFirestore.instance
+                      .collection('Courses')
+                      .doc(courseId)
+                      .get(),
               builder: (context, courseSnapshot) {
                 if (courseSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: Colors.purple));
-                } else if (courseSnapshot.hasError || !courseSnapshot.hasData || !courseSnapshot.data!.exists) {
-                  return const Center(child: Text('Course not found', style: TextStyle(color: Colors.white)));
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.purple),
+                  );
+                } else if (courseSnapshot.hasError ||
+                    !courseSnapshot.hasData ||
+                    !courseSnapshot.data!.exists) {
+                  return const Center(
+                    child: Text(
+                      'Course not found',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
                 }
 
-                final course = courseSnapshot.data!.data() as Map<String, dynamic>;
+                final course =
+                    courseSnapshot.data!.data() as Map<String, dynamic>;
 
-                // جلب بيانات الـ Reviews الخاصة بالكورس
-                final courseReviews = reviewsSnapshot.data!.docs
-                    .where((doc) => doc['course_id']?.toString() == courseId)
-                    .map((doc) => doc.data() as Map<String, dynamic>)
-                    .toList();
+                // Fetch reviews for the course
+                final courseReviews =
+                    reviewsSnapshot.data!.docs
+                        .where(
+                          (doc) => doc['course_id']?.toString() == courseId,
+                        )
+                        .map((doc) => doc.data() as Map<String, dynamic>)
+                        .toList();
 
                 return FutureBuilder<List<Map<String, dynamic>>>(
                   future: Future.wait(
                     courseReviews.map((review) async {
                       final userId = review['user_id']?.toString();
                       if (userId == null) {
-                        return {
-                          'userName': 'Anonymous',
-                          'review': review,
-                        };
+                        return {'userName': 'Anonymous', 'review': review};
                       }
-                      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
-                      final userData = userDoc.data();
+                      final userDoc =
+                          await FirebaseFirestore.instance
+                              .collection('Users')
+                              .doc(userId)
+                              .get();
+                      final userData = userDoc.data() as Map<String, dynamic>?;
                       return {
-                        'userName': userData != null
-                            ? '${userData['first_name'] ?? 'Unknown'} ${userData['last_name'] ?? ''}'
-                            : 'Anonymous',
+                        'userName':
+                            userData != null
+                                ? '${userData['first_name'] ?? 'Unknown'} ${userData['last_name'] ?? ''}'
+                                : 'Anonymous',
                         'review': review,
                       };
                     }),
                   ),
                   builder: (context, reviewUsersSnapshot) {
-                    if (reviewUsersSnapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                    if (reviewUsersSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: Colors.purple),
+                      );
                     } else if (reviewUsersSnapshot.hasError) {
-                      return Center(child: Text('Error: ${reviewUsersSnapshot.error}', style: const TextStyle(color: Colors.white)));
+                      return Center(
+                        child: Text(
+                          'Error: ${reviewUsersSnapshot.error}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      );
                     }
 
                     final reviewUsers = reviewUsersSnapshot.data ?? [];
@@ -309,17 +355,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CourseDetailsScreen(
-                                courseData: {
-                                  ...course, // بيانات الكورس الكاملة من Courses
-                                  'id': courseId,
-                                  'rating': {
-                                    'rate': averageRatings[courseId] ?? 0.0,
-                                    'count': reviewCounts[courseId] ?? 0,
-                                  },
-                                  'reviews': reviewUsers,
-                                },
-                              ),
+                              builder:
+                                  (context) => CourseDetailsScreen(
+                                    courseData: {
+                                      ...course,
+                                      'id': courseId,
+                                      'rating': {
+                                        'rate': averageRatings[courseId] ?? 0.0,
+                                        'count': reviewCounts[courseId] ?? 0,
+                                      },
+                                      'reviews': reviewUsers,
+                                    },
+                                  ),
                             ),
                           );
                         },
@@ -335,7 +382,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                   bottomLeft: Radius.circular(4),
                                 ),
                                 child: Image.network(
-                                  wishlistCourse['thumbnail']?.toString() ?? '',
+                                  wishlistCourse['thumbnail']?.toString() ??
+                                      'https://via.placeholder.com/300x200',
                                   width: 120,
                                   height: 120,
                                   fit: BoxFit.cover,
@@ -356,10 +404,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(12),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        wishlistCourse['title']?.toString() ?? 'Untitled Course',
+                                        wishlistCourse['title']?.toString() ??
+                                            'Untitled Course',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -370,7 +420,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        wishlistCourse['instructor_name']?.toString() ?? 'Unknown Instructor',
+                                        wishlistCourse['instructor_name']
+                                                ?.toString() ??
+                                            'Unknown Instructor',
                                         style: TextStyle(
                                           color: Colors.grey[400],
                                           fontSize: 14,
@@ -396,7 +448,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             wishlistCourse['price'] == 0
@@ -412,7 +465,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                               Icons.delete_outline,
                                               color: Colors.white70,
                                             ),
-                                            onPressed: () => _toggleWishlistItem(courseId),
+                                            onPressed:
+                                                () => _toggleWishlistItem(
+                                                  courseId,
+                                                ),
                                           ),
                                         ],
                                       ),

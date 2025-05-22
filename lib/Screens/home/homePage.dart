@@ -48,44 +48,42 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIcon: const Icon(Icons.video_library, color: Colors.white),
         label: 'Learning',
       ),
-      StreamBuilder<QuerySnapshot>(
-        stream: user != null
-            ? FirebaseFirestore.instance
-                .collection('Wishlists')
-                .doc(user.uid)
-                .collection('items')
-                .snapshots()
-            : Stream.empty(),
-        builder: (context, snapshot) {
-          int wishlistItemCount = 0;
-          if (snapshot.hasData) {
-            wishlistItemCount = snapshot.data!.docs.length;
-          }
+    StreamBuilder<DocumentSnapshot>(
+  stream: user != null
+      ? FirebaseFirestore.instance
+          .collection('Wishlists')
+          .doc(user.uid)
+          .snapshots()
+      : Stream.empty(),
+  builder: (context, snapshot) {
+    int wishlistItemCount = 0;
+    if (snapshot.hasData && snapshot.data!.exists) {
+      final data = snapshot.data!.data() as Map<String, dynamic>?;
+      final items = data?['items'] as List<dynamic>?;
+      wishlistItemCount = items?.length ?? 0;
+    }
 
-          Widget badgeIcon(IconData iconData, Color color) {
-            return badges.Badge(
-              badgeContent: Text(
-                wishlistItemCount.toString(),
-                style: const TextStyle(color: Colors.white, fontSize: 10),
-              ),
-              badgeStyle: const badges.BadgeStyle(
-                badgeColor: Colors.deepPurple,
-                padding: EdgeInsets.all(6),
-              ),
-              child: Icon(iconData, color: color),
-            );
-          }
+    Widget badgeIcon(IconData iconData, Color color) {
+      return badges.Badge(
+        badgeContent: Text(
+          wishlistItemCount.toString(),
+          style: const TextStyle(color: Colors.white, fontSize: 10),
+        ),
+        badgeStyle: const badges.BadgeStyle(
+          badgeColor: Colors.deepPurple,
+          padding: EdgeInsets.all(6),
+        ),
+        child: Icon(iconData, color: color),
+      );
+    }
 
-          return NavigationDestination(
-            icon: badgeIcon(Icons.favorite_border, Colors.grey[400]!),
-            selectedIcon: badgeIcon(Icons.favorite, Colors.white),
-            label: 'Wishlist',
-          );
-        },
-      ),
-    
-    
-    
+    return NavigationDestination(
+      icon: badgeIcon(Icons.favorite_border, Colors.grey[400]!),
+      selectedIcon: badgeIcon(Icons.favorite, Colors.white),
+      label: 'Wishlist',
+    );
+  },
+),
     
       NavigationDestination(
         icon: Icon(Icons.account_circle_outlined, color: Colors.grey[400]),

@@ -4,72 +4,100 @@ import 'package:firebase_auth/firebase_auth.dart';
 class WishlistService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Map<String, String> _instructorCache = {};
 
   Future<bool> toggleWishlist(String courseId) async {
     try {
       final user = _auth.currentUser;
       if (user == null) return false;
 
-      // جلب بيانات الكورس من collection الـ Courses
-      final courseDoc = await _firestore
-          .collection('Courses')
-          .doc(courseId)
-          .get();
-      if (!courseDoc.exists || courseDoc.data() == null) {
-        print('Course $courseId does not exist');
+      // Check if course is in Carts (Still under Users/{uid}/Carts)
+      final cartDoc =
+          await _firestore
+              .collection('Users')
+              .doc(user.uid)
+              .collection('Carts')
+              .doc(courseId)
+              .get();
+
+      // Access the wishlist document
+      final wishlistRef = _firestore.collection('Wishlists').doc(user.uid);
+      final wishlistDoc = await wishlistRef.get();
+
+      // If in Carts, remove from wishlist if exists
+      if (cartDoc.exists) {
+        if (wishlistDoc.exists && wishlistDoc.data() != null) {
+          final items = List<Map<String, dynamic>>.from(
+            wishlistDoc.data()!['items'] ?? [],
+          );
+          final itemToRemove = items.firstWhere(
+            (item) => item['id'] == courseId,
+            orElse: () => {},
+          );
+          if (itemToRemove.isNotEmpty) {
+            await wishlistRef.update({
+              'items': FieldValue.arrayRemove([itemToRemove]),
+            });
+            return true;
+          }
+        }
         return false;
       }
 
-      final courseData = courseDoc.data()!;
-      // جلب بيانات المدرب من Users collection بناءً على instructor_id
-      final instructorId = courseData['instructor_id']?.toString();
-      String instructorName = 'Unknown Instructor';
-      if (instructorId != null && instructorId.isNotEmpty) {
-        final instructorDoc = await _firestore
-            .collection('Users')
-            .doc(instructorId)
-            .get();
-        if (instructorDoc.exists && instructorDoc.data() != null) {
-          final instructorData = instructorDoc.data()!;
-          instructorName = '${instructorData['first_name'] ?? 'Unknown'} ${instructorData['last_name'] ?? ''}'.trim();
+      if (wishlistDoc.exists && wishlistDoc.data() != null) {
+        final items = List<Map<String, dynamic>>.from(
+          wishlistDoc.data()!['items'] ?? [],
+        );
+        final itemExists = items.any((item) => item['id'] == courseId);
+        if (itemExists) {
+          // Remove from wishlist
+          final itemToRemove = items.firstWhere(
+            (item) => item['id'] == courseId,
+          );
+          await wishlistRef.update({
+            'items': FieldValue.arrayRemove([itemToRemove]),
+          });
+          return true;
         }
       }
 
-      final wishlistDocRef = _firestore.collection('Wishlists').doc(user.uid);
-      final wishlistDoc = await wishlistDocRef.get();
-      final items = wishlistDoc.exists && wishlistDoc.data() != null
-          ? List<Map<String, dynamic>>.from(wishlistDoc.data()!['items'] ?? [])
-          : [];
+      // Add to wishlist
+      final courseDoc =
+          await _firestore.collection('Courses').doc(courseId).get();
+      if (!courseDoc.exists) return false;
 
-      // Check if course is already in wishlist
-      final isInWishlist = items.any((item) => item['id'] == courseId);
+      final course = courseDoc.data()!;
+      final instructorName = await getInstructorName(courseId);
 
-      if (isInWishlist) {
-        // Remove course from wishlist
-        await wishlistDocRef.update({
-          'items': FieldValue.arrayRemove([
-            items.firstWhere((item) => item['id'] == courseId)
-          ])
+      final wishlistData = {
+        'id': courseId,
+        'title': course['title'] ?? 'Untitled Course',
+        'price': course['price']?.toDouble() ?? 0.0,
+        'thumbnail':
+            course['thumbnail'] ?? 'https://via.placeholder.com/300x200',
+        'description': course['description'] ?? '',
+        'instructor_name': instructorName,
+        'rating': course['rating'] ?? {'count': 0, 'rate': 0.0},
+        'totalHours': course['totalHours']?.toDouble() ?? 0.0,
+        'lectures': course['lectures']?.toInt() ?? 0,
+        'addedAt':
+            DateTime.now().toIso8601String(), // Match JavaScript's ISO string
+      };
+
+      // Initialize document if it doesn't exist
+      if (!wishlistDoc.exists) {
+        await wishlistRef.set({
+          'items': [wishlistData],
         });
       } else {
-        // Add course to wishlist
-        await wishlistDocRef.set({
-          'items': FieldValue.arrayUnion([
-            {
-              'id': courseId,
-              'title': courseData['title'] ?? 'Untitled Course',
-              'thumbnail': courseData['thumbnail'] ?? '',
-              'instructor_name': instructorName, // استخدمنا instructorName اللي جبناه
-              'price': courseData['price'] ?? 0,
-              'addedAt': FieldValue.serverTimestamp(),
-            }
-          ])
-        }, SetOptions(merge: true));
+        await wishlistRef.update({
+          'items': FieldValue.arrayUnion([wishlistData]),
+        });
       }
 
       return true;
     } catch (e) {
-      print('Error toggling wishlist: $e');
+      print('Error toggling Wishlists: $e');
       return false;
     }
   }
@@ -79,11 +107,7 @@ class WishlistService {
       final user = _auth.currentUser;
       if (user == null) return false;
 
-      final doc = await _firestore
-          .collection('Wishlists')
-          .doc(user.uid)
-          .get();
-
+      final doc = await _firestore.collection('Wishlists').doc(user.uid).get();
       if (!doc.exists || doc.data() == null) return false;
 
       final items = List<Map<String, dynamic>>.from(doc.data()!['items'] ?? []);
@@ -99,12 +123,13 @@ class WishlistService {
       final user = _auth.currentUser;
       if (user == null) return false;
 
-      final doc = await _firestore
-          .collection('Users')
-          .doc(user.uid)
-          .collection('Carts')
-          .doc(courseId)
-          .get();
+      final doc =
+          await _firestore
+              .collection('Users')
+              .doc(user.uid)
+              .collection('Carts')
+              .doc(courseId)
+              .get();
 
       return doc.exists;
     } catch (e) {
@@ -118,21 +143,19 @@ class WishlistService {
       final user = _auth.currentUser;
       if (user == null) return;
 
-      final wishlistDoc = await _firestore
-          .collection('Wishlists')
-          .doc(user.uid)
-          .get();
-
+      final wishlistDoc =
+          await _firestore.collection('Wishlists').doc(user.uid).get();
       if (wishlistDoc.exists && wishlistDoc.data() != null) {
-        final items = List<Map<String, dynamic>>.from(wishlistDoc.data()!['items'] ?? []);
-        if (items.any((item) => item['id'] == courseId)) {
-          await _firestore
-              .collection('Wishlists')
-              .doc(user.uid)
-              .update({
-            'items': FieldValue.arrayRemove([
-              items.firstWhere((item) => item['id'] == courseId)
-            ])
+        final items = List<Map<String, dynamic>>.from(
+          wishlistDoc.data()!['items'] ?? [],
+        );
+        final itemToRemove = items.firstWhere(
+          (item) => item['id'] == courseId,
+          orElse: () => {},
+        );
+        if (itemToRemove.isNotEmpty) {
+          await _firestore.collection('Wishlists').doc(user.uid).update({
+            'items': FieldValue.arrayRemove([itemToRemove]),
           });
         }
       }
@@ -145,25 +168,40 @@ class WishlistService {
     final user = _auth.currentUser;
     if (user == null) return const Stream.empty();
 
-    return _firestore
-        .collection('Wishlists')
-        .doc(user.uid)
-        .snapshots();
+    return _firestore.collection('Wishlists').doc(user.uid).snapshots();
   }
 
-  Future<void> migrateWishlistData(String uid) async {
+  Future<String> getInstructorName(String courseId) async {
     try {
-      final wishlistDoc = await _firestore.collection('Wishlists').doc(uid).get();
-      if (wishlistDoc.exists && wishlistDoc.data() != null) {
-        final data = wishlistDoc.data()!;
-        final items = data.entries
-            .where((entry) => entry.key != 'items')
-            .map((entry) => {...entry.value as Map<String, dynamic>, 'id': entry.key})
-            .toList();
-        await _firestore.collection('Wishlists').doc(uid).set({'items': items}, SetOptions(merge: true));
+      final courseDoc =
+          await _firestore.collection('Courses').doc(courseId).get();
+      if (!courseDoc.exists) return 'Unknown Instructor';
+
+      final course = courseDoc.data()!;
+      final instructorId = course['instructor_id'];
+      if (instructorId == null) return 'Unknown Instructor';
+
+      if (_instructorCache.containsKey(instructorId)) {
+        return _instructorCache[instructorId]!;
       }
+
+      final instructorDoc =
+          await _firestore.collection('Users').doc(instructorId).get();
+
+      if (instructorDoc.exists &&
+          instructorDoc.data()?['role'] == 'instructor') {
+        final firstName = instructorDoc.data()?['first_name'] ?? '';
+        final lastName = instructorDoc.data()?['last_name'] ?? '';
+        final fullName = '$firstName $lastName'.trim();
+        final name = fullName.isEmpty ? 'Unknown Instructor' : fullName;
+        _instructorCache[instructorId] = name;
+        return name;
+      }
+
+      return 'Unknown Instructor';
     } catch (e) {
-      print('Error migrating wishlist data: $e');
+      print('Error fetching instructor name: $e');
+      return 'Unknown Instructor';
     }
   }
 }
