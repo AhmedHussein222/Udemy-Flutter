@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/signup/formsignup.dart';
-import 'package:udemyflutter/Screens/signup/signup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +24,10 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 30),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 34,
+                  vertical: 30,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -102,53 +104,64 @@ class _LoginScreenState extends State<LoginScreen> {
                       textColor: Colors.white,
                       borderColor: Colors.transparent,
                       borderWidth: 0,
-                    onPressed: () async {
-  final email = emailController.text.trim();
-  final password = passwordController.text.trim();
+                      onPressed: () async {
+                        final email = emailController.text.trim();
+                        final password = passwordController.text.trim();
 
-  try {
-    final credential = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password);
+                        try {
+                          final credential = await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                                email: email,
+                                password: password,
+                              );
 
-    final snackBar = SnackBar(
-      content: const Text('Login successful!'),
-      backgroundColor: Colors.green,
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.only(top: 1, left: 20, right: 20, bottom: 100),
-      duration: const Duration(seconds: 1), 
-    );
+                          final snackBar = SnackBar(
+                            content: const Text('Login successful!'),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.only(
+                              top: 1,
+                              left: 20,
+                              right: 20,
+                              bottom: 100,
+                            ),
+                            duration: const Duration(seconds: 1),
+                          );
 
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
+                          Future.delayed(const Duration(seconds: 1), () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          });
+                        } on FirebaseAuthException catch (e) {
+                          String message = 'An error occurred';
+                          if (e.code == 'user-not-found') {
+                            message = 'No user found for that email.';
+                          } else if (e.code == 'wrong-password') {
+                            message = 'Wrong password provided.';
+                          }
 
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    });
-
-  } on FirebaseAuthException catch (e) {
-    String message = 'An error occurred';
-    if (e.code == 'user-not-found') {
-      message = 'No user found for that email.';
-    } else if (e.code == 'wrong-password') {
-      message = 'Wrong password provided.';
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-      ),
-    );
-  }
-},
-
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(message),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              margin: const EdgeInsets.only(
+                                bottom: 20,
+                                left: 20,
+                                right: 20,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                    
+
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
@@ -160,7 +173,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildSocialButton('assets/Images/google-logo.png', () {}),
+                        _buildSocialButton(
+                          'assets/Images/google-logo.png',
+                          () {},
+                        ),
                         const SizedBox(width: 8),
                         _buildSocialButton('assets/Images/3536394.png', () {}),
                         const SizedBox(width: 8),
@@ -220,11 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
           border: Border.all(color: Colors.grey, width: 1.5),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Image.asset(
-          imagePath,
-          width: 30,
-          height: 30,
-        ),
+        child: Image.asset(imagePath, width: 30, height: 30),
       ),
     );
   }
