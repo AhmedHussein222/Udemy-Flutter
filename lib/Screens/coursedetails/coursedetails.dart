@@ -95,75 +95,80 @@ void _showSnackBar(String message, [Color backgroundColor = Colors.red]) {
   }
 }
 
-  Future<void> _addToCart() async {
-    try {
-      final course = widget.courseData;
-      final courseId = course['id']?.toString() ?? course['course_id']?.toString();
+Future<void> _addToCart() async {
+  try {
+    final course = widget.courseData;
+    final courseId = course['id']?.toString() ?? course['course_id']?.toString();
 
-      if (courseId == null || courseId.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Error: Course ID is not available'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
+    if (courseId == null || courseId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: Course ID is not available'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
+      return;
+    }
 
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please login first')),
-            // backgroundColor: Colors.red,
-          );
-        }
-        return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login first')),
+        );
       }
-     final userId = user.uid;
+      return;
+    }
 
-                            final cartItemRef = FirebaseFirestore.instance
-                                .collection('Carts')
-                                .doc(userId)
-                                .collection('items')
-                                .doc(courseId);
+    final userId = user.uid;
+    final cartRef = FirebaseFirestore.instance.collection('Carts').doc(userId);
 
-                            final existingDoc = await cartItemRef.get();
+    final cartSnapshot = await cartRef.get();
+    final existingItems = (cartSnapshot.data()?['items'] ?? []) as List;
 
-                            if (!existingDoc.exists) {
-                              await cartItemRef.set({
-                                'course_id': courseId,
-                                'title': course['title'],
-                                'price': course['price'],
-                                'thumbnail': course['thumbnail'],
-                                'added_at': FieldValue.serverTimestamp(),
-                                
-                              });
+    final alreadyExists = existingItems.any((item) =>
+        item is Map<String, dynamic> &&
+        (item['course_id']?.toString() ?? '') == courseId);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Added to cart')),
-                              );
+    if (alreadyExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Course already in cart')),
+      );
+      return;
+    }
 
-                              // الانتقال لصفحة الـ Cart
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const CartScreen()),
-                              );
+ 
+final courseData = {
+  'course_id': courseId,
+  'title': course['title'] ?? 'No Title',
+  'price': course['price'] ?? 0,
+  'thumbnail': course['thumbnail'] ?? '',
+  'description': course['description'] ?? '',
+  'discount': course['discount'] ?? 0,
+};
 
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Course already in cart')),
-                              );
-                            }
-                          } catch (e) {
-                            print('Error adding to cart: $e');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Something went wrong')),
-                            );
-                          }
-                        }
+
+    await cartRef.set({
+      'items': FieldValue.arrayUnion([courseData]),
+    }, SetOptions(merge: true));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Added to cart')),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CartScreen()),
+    );
+  } catch (e) {
+    print('Error adding to cart: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Something went wrong')),
+    );
+  }
+}
 
   Widget _buildStarRating(double rating) {
     return Row(
@@ -177,305 +182,332 @@ void _showSnackBar(String message, [Color backgroundColor = Colors.red]) {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<dynamic> requirements = widget.courseData['requirements'] ?? [];
-    List<dynamic> whatWillLearn = widget.courseData['what_will_learn'] ?? [];
+ @override
+Widget build(BuildContext context) {
+  final title = (widget.courseData['title'] ?? 'No Title').toString();
+  final thumbnail = (widget.courseData['thumbnail'] ??
+          'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg')
+      .toString();
+  final description = (widget.courseData['description'] ?? 'No Description').toString();
+  final language = (widget.courseData['language'] ?? 'Unknown').toString();
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: FutureBuilder<DocumentSnapshot>(
-        future: instructorFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+  final ratingRate =
+      (widget.courseData['rating'] != null && widget.courseData['rating']['rate'] != null)
+          ? (widget.courseData['rating']['rate'] as num).toDouble()
+          : 0.0;
+  final ratingCount = (widget.courseData['rating'] != null &&
+          widget.courseData['rating']['count'] != null)
+      ? widget.courseData['rating']['count']
+      : 0;
 
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(
-              child: Text(
-                "Instructor not found",
-                style: TextStyle(color: Colors.white),
-              ),
-            );
-          }
+  final price = widget.courseData['price'] ?? 0;
+  final discount = widget.courseData['discount'] ?? 0;
 
-          final instructor = snapshot.data!.data() as Map<String, dynamic>;
+  List<dynamic> requirements = widget.courseData['requirements'] ?? [];
+  List<dynamic> whatWillLearn = widget.courseData['what_will_learn'] ?? [];
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    Image.network(
-                      widget.courseData['thumbnail'] ??
-                          'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: FutureBuilder<DocumentSnapshot>(
+      future: instructorFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(
+            child: Text(
+              "Instructor not found",
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }
+
+        final instructorData =
+            snapshot.data!.data() as Map<String, dynamic>? ?? {};
+
+        final instructorName = (instructorData['name'] ?? 'Instructor').toString();
+        final instructorBio = (instructorData['bio'] ?? '').toString();
+        final instructorProfile = (instructorData['profile_picture'] ??
+                'https://i.pinimg.com/736x/1f/79/73/1f7973fe4680410e3d683040b6da133f.jpg')
+            .toString();
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  Image.network(
+                    thumbnail,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 200,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      'assets/images/default_thumbnail.jpg',
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: 200,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
-                        'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 200,
-                      ),
                     ),
-                    Positioned(
-                      top: 2,
-                      left: 1,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.courseData['title'],
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.courseData['description'] ?? 'No Description',
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildStarRating(
-                        widget.courseData['rating']['rate']?.toDouble() ?? 0.0),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${widget.courseData['rating']['rate']?.toStringAsFixed(1) ?? '0.0'} (${widget.courseData['rating']['count'] ?? 0} reviews)',
-                      style: const TextStyle(fontSize: 16, color: Colors.white70),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.language, color: Colors.white70, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      ' ${widget.courseData['language']}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
+                  Positioned(
+                    top: 2,
+                    left: 1,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 28,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Text(
-                      widget.courseData['price'] == 0
-                          ? 'Free'
-                          : '\$${widget.courseData['price']?.toString() ?? '0'}',
-                      style: const TextStyle(fontSize: 16, color: Colors.white70),
-                    ),
-                    const SizedBox(width: 10),
-                    if (widget.courseData['discount'] != null &&
-                        widget.courseData['discount'] > 0)
-                      Text(
-                        '\$${widget.courseData['discount'].toString()}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white54,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                CustomButton(
-                  text: "Buy Now",
-                  color: Colors.purple,
-                  textColor: Colors.white,
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: _checkingWishlist ? null : _toggleWishlist,
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.white),
-                          shape: RoundedRectangleBorder(),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: _checkingWishlist
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    _isInWishlist
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: _isInWishlist ? Colors.red : Colors.white,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _isInWishlist
-                                        ? "Remove from Wishlist"
-                                        : "Add to Wishlist",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextButton(
-                        onPressed: _addToCart,
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.white),
-                          shape: RoundedRectangleBorder(),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: const Text(
-                          "Add to Cart",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "What you'll learn",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ...whatWillLearn.map(
-                  (item) => Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("• ", style: TextStyle(color: Colors.white70)),
-                      Expanded(
-                        child: Text(
-                          item.toString(),
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Requirements",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ...requirements.map(
-                  (item) => Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("• ", style: TextStyle(color: Colors.white70)),
-                      Expanded(
-                        child: Text(
-                          item.toString(),
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Instructor",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 35,
-                      backgroundImage: NetworkImage(
-                        instructor['profile_picture'] ??
-                            'https://i.pinimg.com/736x/1f/79/73/1f7973fe4680410e3d683040b6da133f.jpg',
-                      ),
-                      onBackgroundImageError: (exception, stackTrace) {
-                        // ممكن تحط صورة افتراضية هنا لو حابب
+                      onPressed: () {
+                        Navigator.pop(context);
                       },
                     ),
-                    const SizedBox(width: 10),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _buildStarRating(ratingRate),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${ratingRate.toStringAsFixed(1)} ($ratingCount reviews)',
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.language, color: Colors.white70, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    ' $language',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Text(
+                    price == 0 ? 'Free' : '\$${price.toString()}',
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                  ),
+                  const SizedBox(width: 10),
+                  if (discount > 0)
+                    Text(
+                      '\$${discount.toString()}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white54,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              CustomButton(
+                text: "Buy Now",
+                color: Colors.purple,
+                textColor: Colors.white,
+                onPressed: () {},
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: _checkingWishlist ? null : _toggleWishlist,
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.white),
+                        shape: RoundedRectangleBorder(),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: _checkingWishlist
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _isInWishlist
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: _isInWishlist ? Colors.red : Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _isInWishlist
+                                      ? "Remove from Wishlist"
+                                      : "Add to Wishlist",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: _addToCart,
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.white),
+                        shape: RoundedRectangleBorder(),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text(
+                        "Add to Cart",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "What you'll learn",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...whatWillLearn.map(
+                (item) => Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("• ", style: TextStyle(color: Colors.white70)),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            instructor['name'] ?? 'Instructor',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            instructor['bio'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        item.toString(),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 40),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Requirements",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...requirements.map(
+                (item) => Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("• ", style: TextStyle(color: Colors.white70)),
+                    Expanded(
+                      child: Text(
+                        item.toString(),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Instructor",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundImage: NetworkImage(
+                      instructorProfile,
+                    ),
+                    onBackgroundImageError: (exception, stackTrace) {
+                      // ممكن تحط صورة افتراضية هنا لو حابب
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          instructorName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          instructorBio,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        );
+      },
+    ),
+  );
 }
+
+
+
+
+}
+
+

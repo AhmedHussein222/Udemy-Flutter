@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/signup/formsignup.dart';
-import 'package:udemyflutter/Screens/signup/signup.dart';
+import 'package:udemyflutter/generated/l10n.dart';
+import 'package:intl/intl.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
+// final Locale selectedLocale ;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,10 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 200,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Center(
                       child: Text(
-                        'Log in to continue your learning \n journey',
+                        S.of(context).titlelogin,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
@@ -48,12 +50,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 20),
                     TextField(
                       controller: emailController,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Email',
+                      decoration:  InputDecoration(
+                        hintText: S.of(context).Email,
                         hintStyle: TextStyle(color: Colors.white70),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white, width: 1),
@@ -70,13 +72,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     TextField(
                       controller: passwordController,
                       obscureText: true,
                       style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Password',
+                      decoration:  InputDecoration(
+                        hintText: S.of(context).Password,
                         hintStyle: TextStyle(color: Colors.white70),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white, width: 1),
@@ -93,15 +95,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    CustomButton(
-                      icon: const Icon(Icons.email),
-                      text: "Log in with email",
-                      color: Colors.deepPurpleAccent,
-                      isOutlined: false,
-                      textColor: Colors.white,
-                      borderColor: Colors.transparent,
-                      borderWidth: 0,
+                    const SizedBox(height: 10),
+                   CustomButton(
+  icon:  Icon(Icons.email ,size:isArabic()?15:30,),
+  text: S.of(context).Loginemail,
+  color: Colors.deepPurpleAccent,
+  isOutlined: false,
+  textColor: Colors.white,
+  borderColor: Colors.transparent,
+  borderWidth: 0,
+  fontSize: isArabic() ? 0 : 10,
+
+
                     onPressed: () async {
   final email = emailController.text.trim();
   final password = passwordController.text.trim();
@@ -111,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
         .signInWithEmailAndPassword(email: email, password: password);
 
     final snackBar = SnackBar(
-      content: const Text('Login successful!'),
+      content:  Text( S.of(context).Loginsuccessful),
       backgroundColor: Colors.green,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.only(top: 1, left: 20, right: 20, bottom: 100),
@@ -152,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
-                        '_____ Other login options _____',
+                        S.of(context).options,
                         style: TextStyle(color: Colors.white38),
                       ),
                     ),
@@ -185,17 +190,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text.rich(
                     TextSpan(
-                      text: "Don't have an account? ",
+                      text: S.of(context).Haveaccount,
                       style: const TextStyle(
                         color: Color.fromARGB(255, 215, 213, 220),
                         fontSize: 16,
                       ),
                       children: [
                         TextSpan(
-                          text: 'Sign Up',
+                          text: S.of(context).SignUp,
                           style: const TextStyle(
                             color: Colors.deepPurpleAccent,
                             fontWeight: FontWeight.bold,
+                        
                           ),
                         ),
                       ],
@@ -228,4 +234,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+bool isArabic()
+{
+  return Intl.getCurrentLocale() == 'ar';
 }

@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-// import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:udemyflutter/Screens/feature/feature.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
-// import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
-// import 'package:udemyflutter/Screens/cart/cart_screen.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 import 'firebase_options.dart';
 import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-
-
+import 'package:intl/intl.dart';
 void main() async {
 
    WidgetsFlutterBinding.ensureInitialized();
@@ -28,32 +23,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-   localizationsDelegates: [
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-
-  ],
-  supportedLocales: [
-    Locale('en', ''), // English
-    Locale('ar', ''), // Arabic
-
-  ],
-  locale: Locale('en'),
-      theme: ThemeData(
-        // textDirection: TextDirection.rtl,
-        primarySwatch: Colors.blue,
-      ),
-      title: 'Flutter Demo',
+      locale: const Locale('en'),
+            localizationsDelegates: [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
+     
+      title: 'Udemy-App',
       debugShowCheckedModeBanner: false, 
       home: SplashScreen(),
-       routes: {
-    '/feature': (context) => FeatureScreen(), // غيري الاسم حسب اسم الصفحة اللي عندك
-    '/checkout': (context) => CheckoutPage(), // غيري الاسم حسب اسم الصفحة اللي عندك
-  },
-      // home: CartScreen()
-      // home: MyLearningScreen()
+
+
     );
   }
+}
+bool isArabic()
+{
+  return Intl.getCurrentLocale() == 'ar';
 }
 
