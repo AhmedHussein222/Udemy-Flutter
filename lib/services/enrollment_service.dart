@@ -33,7 +33,8 @@ class EnrollmentService {
       existingCourses.add({
         'course_id': course['course_id'],
         'title': course['title'],
-        'price': course['price'],
+        'instructor_name': course['innstructor_name'],
+        'thumbnail': course['thumbnail'],
         'enrolled_at': FieldValue.serverTimestamp(),
         'progress': 0,
         'completed_lessons': [],
@@ -98,11 +99,12 @@ class EnrollmentService {
                 (course) => {
                   'course_id': course['course_id'],
                   'title': course['title'],
-                  'price': course['price'],
-                  'enrolled_at': DateTime.now().toIso8601String(),
+                  'instructor_name': course['innstructor_name'],
+                  'thumbnail': course['thumbnail'],
+                  'enrolled_at': FieldValue.serverTimestamp(),
                   'progress': 0,
                   'completed_lessons': [],
-                  'last_accessed': DateTime.now().toIso8601String(),
+                  'last_accessed': FieldValue.serverTimestamp(),
                 },
               )
               .toList();
