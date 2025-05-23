@@ -13,7 +13,8 @@ class CheckoutPage extends StatelessWidget {
   final String userId;
   final List<dynamic> cartItems;
 
-  CheckoutPage({super.key, required this.userId, required this.cartItems});
+  CheckoutPage({Key? key, required this.userId, required this.cartItems})
+    : super(key: key);
 
   void showPaymentDialog(
     BuildContext context,

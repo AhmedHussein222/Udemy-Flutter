@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
@@ -359,7 +359,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                   (context) => CourseDetailsScreen(
                                     courseData: {
                                       ...course,
-                                      'id': courseId,
                                       'rating': {
                                         'rate': averageRatings[courseId] ?? 0.0,
                                         'count': reviewCounts[courseId] ?? 0,
@@ -454,7 +453,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                           Text(
                                             wishlistCourse['price'] == 0
                                                 ? 'Free'
-                                                : '\$${wishlistCourse['price']?.toString() ?? '0'}',
+                                                : '\$${(wishlistCourse['price'] ?? 0.0).toStringAsFixed(2)}',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,

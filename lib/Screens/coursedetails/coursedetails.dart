@@ -330,7 +330,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    if (discount > 0)
+                    if (double.parse(discount.toString()) > 0)
                       Text(
                         '\$${discount.toString()}',
                         style: const TextStyle(
@@ -386,7 +386,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                                     const SizedBox(width: 8),
                                     Text(
                                       _isInWishlist
-                                          ? "Remove from Wishlist"
+                                          ? "Remove  "
                                           : "Add to Wishlist",
                                       style: const TextStyle(
                                         color: Colors.white,
