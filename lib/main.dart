@@ -2,16 +2,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 import 'package:udemyflutter/Screens/feature/feature.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
-
+import 'package:udemyflutter/Screens/course_content/course_content_screen.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 import 'firebase_options.dart';
 
-import 'package:udemyflutter/generated/l10n.dart';
-import 'package:intl/intl.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -24,34 +24,33 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-       title: 'Udemy-App',
+      title: 'Udemy-App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       locale: Locale('en'),
       localizationsDelegates: [
-      S.delegate,
+        S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      
-       supportedLocales: S.delegate.supportedLocales,
+      supportedLocales: S.delegate.supportedLocales,
+      home: CourseContentScreen(courseId: '1'),
+      // StreamBuilder<User?>(
+      //   stream: FirebaseAuth.instance.authStateChanges(),
+      //   builder: (context, snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.waiting) {
+      //       return const Center(child: CircularProgressIndicator());
+      //     }
 
-      
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      //     if (snapshot.hasData) {
+      //       return const HomeScreen();
+      //     }
 
-          if (snapshot.hasData) {
-            return const HomeScreen();
-          }
-
-          return const SplashScreen();
-        },
-      ),
+      //     return const SplashScreen();
+      //   },
+      // ),
+     
       onGenerateRoute: (settings) {
         if (settings.name == '/feature') {
           return MaterialPageRoute(builder: (_) => FeatureScreen());
@@ -63,11 +62,10 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/checkout') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder:
-                (_) => CheckoutPage(
-                  userId: args['userId'],
-                  cartItems: args['cartItems'],
-                ),
+            builder: (_) => CheckoutPage(
+              userId: args['userId'],
+              cartItems: args['cartItems'],
+            ),
           );
         }
 
@@ -76,7 +74,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-bool isArabic()
-{
+
+bool isArabic() {
   return Intl.getCurrentLocale() == 'ar';
 }

@@ -2,17 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/enrollment_service.dart';
+import '../../services/order_service.dart';
 import '../../services/paypal_checkout_webview.dart';
 import '../../services/paypal_services.dart';
 
 class CheckoutPage extends StatelessWidget {
   final PayPalService paypalService = PayPalService();
   final EnrollmentService enrollmentService = EnrollmentService();
+  final OrderService orderService = OrderService();
   final String userId;
   final List<dynamic> cartItems;
 
-  CheckoutPage({Key? key, required this.userId, required this.cartItems})
-    : super(key: key);
+  CheckoutPage({super.key, required this.userId, required this.cartItems});
 
   void showPaymentDialog(
     BuildContext context,
@@ -254,6 +255,26 @@ class CheckoutPage extends StatelessWidget {
                                               );
 
                                           if (success) {
+                                            // إنشاء الطلب
+                                            final orderSuccess =
+                                                await orderService.createOrder(
+                                                  cartItems:
+                                                      cartItems
+                                                          .map(
+                                                            (item) => {
+                                                              'id':
+                                                                  item['course_id'],
+                                                              'title':
+                                                                  item['title'],
+                                                              'price':
+                                                                  item['price'],
+                                                            },
+                                                          )
+                                                          .toList(),
+                                                  total: double.parse(amount),
+                                                  paymentDetails: result,
+                                                );
+
                                             // حذف عناصر السلة بعد نجاح الدفع
                                             await FirebaseFirestore.instance
                                                 .collection('Carts')
