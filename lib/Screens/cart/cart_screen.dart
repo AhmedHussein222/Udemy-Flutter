@@ -311,21 +311,8 @@ class CartScreen extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    TextButton(
-                                      onPressed:
-                                          () => _checkoutItem(
-                                            context,
-                                            cartRef,
-                                            item,
-                                          ),
-                                      child: const Text(
-                                        'Checkout',
-                                        style: TextStyle(
-                                          color: Colors.purple,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
+                                  
+
                                   ],
                                 ),
                               ],

@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/subcategories/SubCategories.dart';
+
+import '../../services/enrollment_service.dart';
+import '../course_content/course_content_screen.dart';
 
 class MyLearningScreen extends StatefulWidget {
   const MyLearningScreen({super.key});
@@ -15,10 +19,16 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
   // بدّلنا النوع علشان يحتوي على name و id
   List<Map<String, String>> categories = [];
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final EnrollmentService _enrollmentService = EnrollmentService();
+  List<Map<String, dynamic>> _enrolledCourses = [];
+  bool _isLoadingCourses = true;
+
   @override
   void initState() {
     super.initState();
     fetchCategoriesFromFirebase();
+    _loadEnrolledCourses();
   }
 
   Future<void> fetchCategoriesFromFirebase() async {
@@ -26,18 +36,37 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
       QuerySnapshot snapshot =
           await FirebaseFirestore.instance.collection('Categories').get();
 
-      List<Map<String, String>> fetchedCategories = snapshot.docs.map((doc) {
-        return {
-          'id': doc.id,
-          'name': doc['name'].toString(),
-        };
-      }).toList();
+      List<Map<String, String>> fetchedCategories =
+          snapshot.docs.map((doc) {
+            return {'id': doc.id, 'name': doc['name'].toString()};
+          }).toList();
 
       setState(() {
         categories = fetchedCategories;
       });
     } catch (e) {
       print("Error fetching categories: $e");
+    }
+  }
+
+  Future<void> _loadEnrolledCourses() async {
+    setState(() {
+      _isLoadingCourses = true;
+    });
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final courses = await _enrollmentService.getUserEnrollments(user.uid);
+        setState(() {
+          _enrolledCourses = courses;
+        });
+      }
+    } catch (e) {
+      print('Error loading enrolled courses: $e');
+    } finally {
+      setState(() {
+        _isLoadingCourses = false;
+      });
     }
   }
 
@@ -78,79 +107,100 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: selectedTab == "All"
-                  ? SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 30),
-                          Center(
-                            child: Image.asset(
-                              'assets/Images/value-prop-teach-2x-v3.webp',
-                              height: 150,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "What will you learn first?",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            "Your courses will go here.",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 16),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: categories.map((category) {
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                SubCategoriesScreen(
-                                              categoryName:
+              child:
+                  selectedTab == "All"
+                      ? _isLoadingCourses
+                          ? const Center(child: CircularProgressIndicator())
+                          : _enrolledCourses.isEmpty
+                          ? SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 30),
+                                Center(
+                                  child: Image.asset(
+                                    'assets/Images/value-prop-teach-2x-v3.webp',
+                                    height: 150,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                const Text(
+                                  "What will you learn first?",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  "Your courses will go here.",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 30),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children:
+                                          categories.map((category) {
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 8,
+                                                  ),
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (
+                                                            context,
+                                                          ) => SubCategoriesScreen(
+                                                            categoryName:
+                                                                category['name'] ??
+                                                                '',
+                                                            categoryId:
+                                                                category['id'] ??
+                                                                '',
+                                                          ),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text(
                                                   category['name'] ?? '',
-                                              categoryId:
-                                                  category['id'] ?? '',
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Text(
-                                        category['name'] ?? '',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          decoration: TextDecoration.underline,
-                                        ),
-                                      ),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    decoration:
+                                                        TextDecoration
+                                                            .underline,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
                                     ),
-                                  );
-                                }).toList(),
-                              ),
+                                  ),
+                                ),
+                                const SizedBox(height: 30),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 30),
-                        ],
-                      ),
-                    )
-                  : buildTabContent(),
+                          )
+                          : ListView.builder(
+                            itemCount: _enrolledCourses.length,
+                            itemBuilder: (context, index) {
+                              final course = _enrolledCourses[index];
+                              return _buildCourseItem(course);
+                            },
+                          )
+                      : buildTabContent(),
             ),
           ],
         ),
@@ -184,10 +234,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
             child: Text(
               "When you download a course to take with you, you'll see them here!",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ),
         ],
@@ -228,6 +275,105 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
           style: TextStyle(
             color: isSelected ? Colors.black : Colors.white,
             fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCourseItem(Map<String, dynamic> course) {
+    final progress = course['progress'] ?? 0;
+    return GestureDetector(
+      onTap: () {
+        // Navigate to CourseContentScreen with courseId
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => CourseContentScreen(courseId: course['course_id']),
+          ),
+        );
+      },
+      child: Card(
+        color: Colors.black,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Thumbnail (replace with actual Image.network)
+              Container(
+                width: 100,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.grey[800], // Placeholder color
+                  image: DecorationImage(
+                    image: NetworkImage(course['thumbnail'] ?? ''),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      course['title'] ?? 'No Title',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      course['instructor_name'] ?? 'Unknown Instructor',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (progress > 0 &&
+                        progress < 100) // Show progress only if not 0 or 100
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Complete $progress%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          LinearProgressIndicator(
+                            value: progress / 100.0,
+                            backgroundColor: Colors.grey[700],
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Colors.purple,
+                            ),
+                          ),
+                        ],
+                      )
+                    else if (progress ==
+                        100) // Show "Completed" if progress is 100
+                      const Text(
+                        'Completed',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
