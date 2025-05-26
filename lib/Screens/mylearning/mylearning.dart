@@ -283,14 +283,20 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
 
   Widget _buildCourseItem(Map<String, dynamic> course) {
     final progress = course['progress'] ?? 0;
+    final courseId = course['id'] ?? course['course_id'] ?? '';
+    print('Course data: $course');
+
+    if (courseId.isEmpty) {
+      print('Warning: Course ID is empty for course: $course');
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
       onTap: () {
-        // Navigate to CourseContentScreen with courseId
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => CourseContentScreen(courseId: course['course_id']),
+            builder: (context) => CourseContentScreen(courseId: courseId),
           ),
         );
       },
@@ -302,15 +308,17 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Thumbnail (replace with actual Image.network)
               Container(
                 width: 100,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.grey[800], // Placeholder color
+                  color: Colors.grey[800] ?? Colors.black,
                   image: DecorationImage(
                     image: NetworkImage(course['thumbnail'] ?? ''),
                     fit: BoxFit.cover,
+                    onError: (exception, stackTrace) {
+                      print('Error loading image: $exception');
+                    },
                   ),
                 ),
               ),
@@ -329,17 +337,8 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      course['instructor_name'] ?? 'Unknown Instructor',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
                     const SizedBox(height: 8),
-                    if (progress > 0 &&
-                        progress < 100) // Show progress only if not 0 or 100
+                    if (progress >= 0 && progress < 100)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -360,8 +359,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                           ),
                         ],
                       )
-                    else if (progress ==
-                        100) // Show "Completed" if progress is 100
+                    else if (progress == 100)
                       const Text(
                         'Completed',
                         style: TextStyle(

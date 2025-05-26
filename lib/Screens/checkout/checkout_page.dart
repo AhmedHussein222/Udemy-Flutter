@@ -193,7 +193,7 @@ class CheckoutPage extends StatelessWidget {
                           SizedBox(width: 8),
                           Icon(Icons.lock, color: Colors.green, size: 16),
                           Text(
-                            "Secure and encrypted",
+                            "Secure ",
                             style: TextStyle(color: Colors.green, fontSize: 12),
                           ),
                         ],
@@ -240,20 +240,36 @@ class CheckoutPage extends StatelessWidget {
                                               result['payer']['email_address'];
                                           final amount =
                                               result['purchase_units'][0]['payments']['captures'][0]['amount']['value'];
-                                          final success = await enrollmentService
-                                              .updateEnrollments(
-                                                cartItems
-                                                    .map<Map<String, dynamic>>(
-                                                      (item) => {
-                                                        'course_id':
-                                                            item['course_id'],
-                                                        'title': item['title'],
-                                                        'price': item['price'],
-                                                      },
-                                                    )
-                                                    .toList(),
-                                                userId: userId,
-                                              );
+                                          final success = await enrollmentService.updateEnrollments(
+                                            cartItems.map<
+                                              Map<String, dynamic>
+                                            >((item) {
+                                             
+
+                                              final thumbnail =
+                                                  item['thumbnail']
+                                                      ?.toString() ??
+                                                  '';
+                                              if (thumbnail.isEmpty) {
+                                                print(
+                                                  'Warning: Empty thumbnail for course ${item['course_id'] ?? item['id']}',
+                                                );
+                                              }
+
+                                              return {
+                                                'id':
+                                                    item['course_id'] ??
+                                                    item['id'],
+                                                'title': item['title'],
+                                                'price': item['price'],
+                                                'thumbnail':
+                                                    thumbnail.isNotEmpty
+                                                        ? thumbnail
+                                                        : 'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
+                                              };
+                                            }).toList(),
+                                            userId: userId,
+                                          );
 
                                           if (success) {
                                             // إنشاء الطلب

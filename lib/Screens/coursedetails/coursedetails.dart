@@ -97,8 +97,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   Future<void> _addToCart() async {
     try {
       final course = widget.courseData;
-      final courseId =
-          course['id']?.toString() ?? course['course_id']?.toString();
+      final courseId = course['course_id']?.toString();
 
       if (courseId == null || courseId.isEmpty) {
         if (mounted) {
@@ -144,6 +143,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       }
 
       final courseData = {
+        'id': courseId,
         'course_id': courseId,
         'title': course['title'] ?? 'No Title',
         'price': course['price'] ?? 0,

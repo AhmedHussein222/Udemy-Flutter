@@ -21,9 +21,7 @@ class EnrollmentService {
         );
 
         // Check if course already exists
-        if (existingCourses.any(
-          (existing) => existing['course_id'] == course['course_id'],
-        )) {
+        if (existingCourses.any((existing) => existing['id'] == course['id'])) {
           print("Course already enrolled");
           return false;
         }
@@ -31,14 +29,13 @@ class EnrollmentService {
 
       // Add new course
       existingCourses.add({
-        'course_id': course['course_id'],
+        'id': course['id'],
         'title': course['title'],
-        'instructor_name': course['innstructor_name'],
         'thumbnail': course['thumbnail'],
-        'enrolled_at': FieldValue.serverTimestamp(),
+        'enrolled_at': Timestamp.now(),
         'progress': 0,
         'completed_lessons': [],
-        'last_accessed': FieldValue.serverTimestamp(),
+        'last_accessed': Timestamp.now(),
       });
 
       // Update document
@@ -60,7 +57,6 @@ class EnrollmentService {
     String? userId,
   }) async {
     try {
-      // Use provided userId or fallback to current user
       final String targetUserId = userId ?? _auth.currentUser?.uid ?? '';
       if (targetUserId.isEmpty) {
         print("No valid user ID provided");
@@ -78,46 +74,47 @@ class EnrollmentService {
         existingCourses = List<Map<String, dynamic>>.from(
           data['courses'] ?? [],
         );
-        print("existingCourses in enroll: $existingCourses");
       }
 
-      // Remove duplicates by ID
       final newCourses =
           cartItems
               .where(
                 (item) =>
                     !existingCourses.any(
-                      (existing) => existing['course_id'] == item['course_id'],
+                      (existing) => existing['id'] == item['id'],
                     ),
               )
               .toList();
 
-      // Add additional information for new courses
       final formattedNewCourses =
-          newCourses
-              .map(
-                (course) => {
-                  'course_id': course['course_id'],
-                  'title': course['title'],
-                  'instructor_name': course['innstructor_name'],
-                  'thumbnail': course['thumbnail'],
-                  'enrolled_at': FieldValue.serverTimestamp(),
-                  'progress': 0,
-                  'completed_lessons': [],
-                  'last_accessed': FieldValue.serverTimestamp(),
-                },
-              )
-              .toList();
+          newCourses.map((course) {
+            final thumbnail = course['thumbnail']?.toString() ?? '';
+            if (thumbnail.isEmpty) {
+              print('Warning: Empty thumbnail for course ${course['id']}');
+            }
+
+            return {
+              'id': course['id'],
+              'title': course['title'],
+              'thumbnail':
+                  thumbnail.isNotEmpty
+                      ? thumbnail
+                      : 'https://i.pinimg.com/736x/42/3b/97/423b97b41c8b420d28e84f9b07a530ec.jpg',
+              'enrolled_at': Timestamp.now(),
+              'progress': 0,
+              'completed_lessons': [],
+              'last_accessed': Timestamp.now(),
+            };
+          }).toList();
+
+      print("\nFormatted New Courses: $formattedNewCourses");
 
       final updatedCourses = [...existingCourses, ...formattedNewCourses];
 
-      // Create or update the document
       await enrollmentRef.set({
         'user_id': targetUserId,
         'courses': updatedCourses,
         'timestamp': FieldValue.serverTimestamp(),
-        'created_at':
-            enrollmentSnap.exists ? null : FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
       print("Successfully updated enrollments for user: $targetUserId");
@@ -166,7 +163,7 @@ class EnrollmentService {
 
       // Find course and update progress
       final courseIndex = courses.indexWhere(
-        (course) => course['course_id'] == courseId,
+        (course) => course['id'] == courseId,
       );
       if (courseIndex == -1) {
         return false;
@@ -174,7 +171,7 @@ class EnrollmentService {
 
       courses[courseIndex]['progress'] = progress;
       courses[courseIndex]['completed_lessons'] = completedLessons;
-      courses[courseIndex]['last_accessed'] = FieldValue.serverTimestamp();
+      courses[courseIndex]['last_accessed'] = Timestamp.now();
 
       await enrollmentRef.update({'courses': courses});
 

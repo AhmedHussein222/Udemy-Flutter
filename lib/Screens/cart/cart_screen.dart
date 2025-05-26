@@ -182,7 +182,8 @@ class CartScreen extends StatelessWidget {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final item = Map<String, dynamic>.from(items[index]);
-                    final courseId = item['course_id']?.toString() ?? '';
+                    final courseId =
+                        item['course_id']?.toString() ?? item['id'];
 
                     return GestureDetector(
                       // onTap: () {
@@ -311,8 +312,6 @@ class CartScreen extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                  
-
                                   ],
                                 ),
                               ],
