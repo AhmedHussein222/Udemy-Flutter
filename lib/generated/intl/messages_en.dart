@@ -32,9 +32,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m5(error) => "Error updating password: ${error}";
 
+  static String m6(amount, email) =>
+      "Payment successful: ${amount} from ${email}\\nEnrollments updated successfully";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "BrowseCourses": MessageLookupByLibrary.simpleMessage("Browse Courses"),
+    "Cancelled": MessageLookupByLibrary.simpleMessage("Cancelled"),
+    "Cart": MessageLookupByLibrary.simpleMessage("Cart"),
+    "Categories": MessageLookupByLibrary.simpleMessage("Categories"),
+    "Checkout": MessageLookupByLibrary.simpleMessage("Checkout"),
+    "Completed": MessageLookupByLibrary.simpleMessage("Completed"),
+    "Courseremoved": MessageLookupByLibrary.simpleMessage(
+      "Course removed from wishlist",
+    ),
+    "Coursesyousavetoyourwishlistwillappearhere":
+        MessageLookupByLibrary.simpleMessage(
+          "Courses you save to your wishlist will appear here",
+        ),
     "Email": MessageLookupByLibrary.simpleMessage("Email"),
+    "Failed": MessageLookupByLibrary.simpleMessage("Failed"),
+    "FeaturescoursesinWebDevelopment": MessageLookupByLibrary.simpleMessage(
+      "Featured courses in Web Development",
+    ),
     "Haveaccount": MessageLookupByLibrary.simpleMessage(
       "Don\'t have an account?",
     ),
@@ -43,19 +63,60 @@ class MessageLookup extends MessageLookupByLibrary {
     "Loginsuccessful": MessageLookupByLibrary.simpleMessage(
       "Login successful!",
     ),
+    "MyCourses": MessageLookupByLibrary.simpleMessage("My Courses"),
+    "NewCourses": MessageLookupByLibrary.simpleMessage("New Courses"),
+    "NoMatchingcourses": MessageLookupByLibrary.simpleMessage(
+      "No matching courses found",
+    ),
+    "Nocoursesfound": MessageLookupByLibrary.simpleMessage("No courses found"),
+    "OrderSummary": MessageLookupByLibrary.simpleMessage("Order Summary"),
+    "OriginalPrice": MessageLookupByLibrary.simpleMessage("Original Price:"),
     "Password": MessageLookupByLibrary.simpleMessage("Password"),
+    "PayPal": MessageLookupByLibrary.simpleMessage("PayPal"),
+    "PaymentMethod": MessageLookupByLibrary.simpleMessage("Payment Method"),
+    "Paymentsuccessfulbutfailedtoupdateenrollments":
+        MessageLookupByLibrary.simpleMessage(
+          "Payment successful but failed to update enrollments",
+        ),
+    "Paymentwascancelledbyuser": MessageLookupByLibrary.simpleMessage(
+      "Payment was cancelled by user",
+    ),
+    "Paymentwasnotcompleted": MessageLookupByLibrary.simpleMessage(
+      "Payment was not completed",
+    ),
+    "PoweredbyPayPal": MessageLookupByLibrary.simpleMessage(
+      "Powered by PayPal",
+    ),
+    "ProceedtoCheckout": MessageLookupByLibrary.simpleMessage(
+      "Proceed to Checkout",
+    ),
+    "Remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "SignUp": MessageLookupByLibrary.simpleMessage("Sign Up"),
+    "Success": MessageLookupByLibrary.simpleMessage("Success"),
+    "TopRatedCourses": MessageLookupByLibrary.simpleMessage(
+      "Top Rated Courses",
+    ),
+    "Welcome": MessageLookupByLibrary.simpleMessage("Welcome"),
+    "Wishlist": MessageLookupByLibrary.simpleMessage("Wishlist"),
+    "Yourwishlistisempty": MessageLookupByLibrary.simpleMessage(
+      "Your wishlist is empty",
+    ),
+    "account": MessageLookupByLibrary.simpleMessage("Account"),
+    "all": MessageLookupByLibrary.simpleMessage("All"),
     "alreadyHaveAccount": MessageLookupByLibrary.simpleMessage(
       "Already have an account?",
     ),
+    "archived": MessageLookupByLibrary.simpleMessage("Archived"),
     "bio": MessageLookupByLibrary.simpleMessage("Bio:"),
     "bioField": MessageLookupByLibrary.simpleMessage("Bio"),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "cartEmpty": MessageLookupByLibrary.simpleMessage("Your Cart is empty!"),
     "changePassword": MessageLookupByLibrary.simpleMessage("Change Password"),
     "changeProfileImage": MessageLookupByLibrary.simpleMessage(
       "Change Profile Image",
     ),
     "confirmPassword": MessageLookupByLibrary.simpleMessage("Confirm Password"),
+    "confirmcheckout": MessageLookupByLibrary.simpleMessage("Confirm Checkout"),
     "continueText": MessageLookupByLibrary.simpleMessage("Continue"),
     "currentPassword": MessageLookupByLibrary.simpleMessage("Current Password"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -69,6 +130,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteAccountDialogTitle": MessageLookupByLibrary.simpleMessage(
       "Delete Account",
     ),
+    "downloadMessage": MessageLookupByLibrary.simpleMessage(
+      "When you download a course to take with you, you\'ll see them here!",
+    ),
+    "downloaded": MessageLookupByLibrary.simpleMessage("Downloaded"),
     "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
     "errorDeletingAccount": m0,
     "errorFetchingProfile": m1,
@@ -78,17 +143,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorUpdatingPassword": m5,
     "facebook": MessageLookupByLibrary.simpleMessage("Facebook:"),
     "facebookUrl": MessageLookupByLibrary.simpleMessage("Facebook URL"),
+    "favourited": MessageLookupByLibrary.simpleMessage("Favourited"),
+    "feature": MessageLookupByLibrary.simpleMessage("Feature"),
     "firstName": MessageLookupByLibrary.simpleMessage("First Name"),
     "gender": MessageLookupByLibrary.simpleMessage("Gender"),
+    "goShopping": MessageLookupByLibrary.simpleMessage("Go Shopping"),
     "home": MessageLookupByLibrary.simpleMessage("Home"),
     "instagram": MessageLookupByLibrary.simpleMessage("Instagram:"),
     "instagramUrl": MessageLookupByLibrary.simpleMessage("Instagram URL"),
     "lastName": MessageLookupByLibrary.simpleMessage("Last Name"),
+    "learning": MessageLookupByLibrary.simpleMessage("Learning"),
     "linkedin": MessageLookupByLibrary.simpleMessage("LinkedIn:"),
     "linkedinUrl": MessageLookupByLibrary.simpleMessage("LinkedIn URL"),
     "logout": MessageLookupByLibrary.simpleMessage("Log out"),
     "newPassword": MessageLookupByLibrary.simpleMessage("New Password"),
     "noBioProvided": MessageLookupByLibrary.simpleMessage("No bio provided"),
+    "nothingDownloaded": MessageLookupByLibrary.simpleMessage(
+      "Nothing\'s downloaded yet",
+    ),
     "options": MessageLookupByLibrary.simpleMessage(
       "_____ Other login options _____",
     ),
@@ -98,6 +170,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "passwordUpdated": MessageLookupByLibrary.simpleMessage(
       "Password updated successfully.",
     ),
+    "paymentSuccess": m6,
     "pickImage": MessageLookupByLibrary.simpleMessage("Pick Image"),
     "profileImageUpdated": MessageLookupByLibrary.simpleMessage(
       "Profile image updated.",
@@ -106,6 +179,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Profile saved successfully.",
     ),
     "saveProfile": MessageLookupByLibrary.simpleMessage("Save Profile"),
+    "search": MessageLookupByLibrary.simpleMessage("Search"),
     "selectImage": MessageLookupByLibrary.simpleMessage(
       "Select an image from your gallery.",
     ),
@@ -141,6 +215,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "userNotLoggedIn": MessageLookupByLibrary.simpleMessage(
       "User not logged in.",
+    ),
+    "whatToLearn": MessageLookupByLibrary.simpleMessage(
+      "What will you learn first?",
+    ),
+    "wishlist": MessageLookupByLibrary.simpleMessage("Wishlist"),
+    "yourCourses": MessageLookupByLibrary.simpleMessage(
+      "Your courses will go here.",
     ),
     "youtube": MessageLookupByLibrary.simpleMessage("YouTube:"),
     "youtubeUrl": MessageLookupByLibrary.simpleMessage("YouTube URL"),

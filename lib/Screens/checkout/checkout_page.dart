@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 import '../../services/enrollment_service.dart';
 import '../../services/order_service.dart';
@@ -50,23 +51,26 @@ class CheckoutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+    backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text("Checkout"),
+        title: Text(   S.of(context).Checkout,
+          style: TextStyle(color: Colors.white),
+        ),
         elevation: 0,
-        backgroundColor: Theme.of(context).secondaryHeaderColor,
+        backgroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).primaryColor.withOpacity(0.1),
-                Colors.white,
-              ],
-            ),
-          ),
+        // child: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       begin: Alignment.topCenter,
+        //       end: Alignment.bottomCenter,
+        //       colors: [
+        //         Theme.of(context).primaryColor,
+        //         Colors.white,
+        //       ],
+        //     ),
+        //   ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -97,7 +101,7 @@ class CheckoutPage extends StatelessWidget {
                           ),
                           SizedBox(width: 8),
                           Text(
-                            "Order Summary",
+                          S.of(context).OrderSummary,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -110,7 +114,7 @@ class CheckoutPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Original Price:",
+                          S.of(context).OriginalPrice,
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                           Text(
@@ -302,7 +306,7 @@ class CheckoutPage extends StatelessWidget {
 
                                             showPaymentDialog(
                                               context,
-                                              "Success",
+                                               S.of(context).Success,
                                               "Payment successful: $amount from $email\nEnrollments updated successfully",
                                             );
 
@@ -315,16 +319,16 @@ class CheckoutPage extends StatelessWidget {
                                           } else {
                                             showPaymentDialog(
                                               context,
-                                              "Failed",
-                                              "Payment successful but failed to update enrollments",
+                                               S.of(context).Failed,
+                                               S.of(context).Paymentsuccessfulbutfailedtoupdateenrollments,
                                               success: false,
                                             );
                                           }
                                         } else {
                                           showPaymentDialog(
                                             context,
-                                            "Failed",
-                                            "Payment was not completed.",
+                                         S.of(context).Failed,
+                                               S.of(context).Paymentwasnotcompleted,
                                             success: false,
                                           );
                                         }
@@ -333,8 +337,8 @@ class CheckoutPage extends StatelessWidget {
                                         Navigator.pop(context);
                                         showPaymentDialog(
                                           context,
-                                          "Cancelled",
-                                          "Payment was cancelled by user.",
+                                     S.of(context).Cancelled,
+                                      S.of(context).Paymentwascancelledbyuser,
                                           success: false,
                                         );
                                       },
@@ -356,7 +360,7 @@ class CheckoutPage extends StatelessWidget {
                               Icon(Icons.payment, color: Colors.white),
                               SizedBox(width: 8),
                               Text(
-                                "PayPal",
+                           S.of(context).PayPal,
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -484,7 +488,7 @@ class CheckoutPage extends StatelessWidget {
                 SizedBox(height: 24),
                 Center(
                   child: Text(
-                    "Powered by PayPal",
+                  S.of(context).PoweredbyPayPal,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ),
@@ -492,7 +496,7 @@ class CheckoutPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+  
   }
 }

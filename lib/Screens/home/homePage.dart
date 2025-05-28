@@ -8,6 +8,8 @@ import 'package:udemyflutter/Screens/search/search.dart';
 import 'package:udemyflutter/Screens/wishlist/wishlist.dart';
 import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:udemyflutter/generated/l10n.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,65 +34,64 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-    final List<Widget> bottomDestinations = [
-      NavigationDestination(
-        icon: Icon(Icons.star_border_outlined, color: Colors.grey[400]),
-        selectedIcon: const Icon(Icons.star, color: Colors.white),
-        label: 'Feature',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.search, color: Colors.grey[400]),
-        selectedIcon: const Icon(Icons.search, color: Colors.white),
-        label: 'Search',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.video_library_outlined, color: Colors.grey[400]),
-        selectedIcon: const Icon(Icons.video_library, color: Colors.white),
-        label: 'Learning',
-      ),
-    StreamBuilder<DocumentSnapshot>(
-  stream: user != null
-      ? FirebaseFirestore.instance
-          .collection('Wishlists')
-          .doc(user.uid)
-          .snapshots()
-      : Stream.empty(),
-  builder: (context, snapshot) {
-    int wishlistItemCount = 0;
-    if (snapshot.hasData && snapshot.data!.exists) {
-      final data = snapshot.data!.data() as Map<String, dynamic>?;
-      final items = data?['items'] as List<dynamic>?;
-      wishlistItemCount = items?.length ?? 0;
-    }
+  final List<Widget> bottomDestinations = [
+  NavigationDestination(
+    icon: Icon(Icons.star_border_outlined, color: Colors.grey[400]),
+    selectedIcon: const Icon(Icons.star, color: Colors.white),
+    label: S.of(context).feature,
+  ),
+  NavigationDestination(
+    icon: Icon(Icons.search, color: Colors.grey[400]),
+    selectedIcon: const Icon(Icons.search, color: Colors.white),
+    label: S.of(context).search,
+  ),
+  NavigationDestination(
+    icon: Icon(Icons.video_library_outlined, color: Colors.grey[400]),
+    selectedIcon: const Icon(Icons.video_library, color: Colors.white),
+    label: S.of(context)!.learning,
+  ),
+  StreamBuilder<DocumentSnapshot>(
+    stream: user != null
+        ? FirebaseFirestore.instance
+            .collection('Wishlists')
+            .doc(user.uid)
+            .snapshots()
+        : Stream.empty(),
+    builder: (context, snapshot) {
+      int wishlistItemCount = 0;
+      if (snapshot.hasData && snapshot.data!.exists) {
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        final items = data?['items'] as List<dynamic>?;
+        wishlistItemCount = items?.length ?? 0;
+      }
 
-    Widget badgeIcon(IconData iconData, Color color) {
-      return badges.Badge(
-        badgeContent: Text(
-          wishlistItemCount.toString(),
-          style: const TextStyle(color: Colors.white, fontSize: 10),
-        ),
-        badgeStyle: const badges.BadgeStyle(
-          badgeColor: Colors.deepPurple,
-          padding: EdgeInsets.all(6),
-        ),
-        child: Icon(iconData, color: color),
+      Widget badgeIcon(IconData iconData, Color color) {
+        return badges.Badge(
+          badgeContent: Text(
+            wishlistItemCount.toString(),
+            style: const TextStyle(color: Colors.white, fontSize: 10),
+          ),
+          badgeStyle: const badges.BadgeStyle(
+            badgeColor: Colors.deepPurple,
+            padding: EdgeInsets.all(6),
+          ),
+          child: Icon(iconData, color: color),
+        );
+      }
+
+      return NavigationDestination(
+        icon: badgeIcon(Icons.favorite_border, Colors.grey[400]!),
+        selectedIcon: badgeIcon(Icons.favorite, Colors.white),
+        label: S.of(context).wishlist,
       );
-    }
-
-    return NavigationDestination(
-      icon: badgeIcon(Icons.favorite_border, Colors.grey[400]!),
-      selectedIcon: badgeIcon(Icons.favorite, Colors.white),
-      label: 'Wishlist',
-    );
-  },
-),
-    
-      NavigationDestination(
-        icon: Icon(Icons.account_circle_outlined, color: Colors.grey[400]),
-        selectedIcon: const Icon(Icons.account_circle, color: Colors.white),
-        label: 'Account',
-      ),
-    ];
+    },
+  ),
+  NavigationDestination(
+    icon: Icon(Icons.account_circle_outlined, color: Colors.grey[400]),
+    selectedIcon: const Icon(Icons.account_circle, color: Colors.white),
+    label: S.of(context).account,
+  ),
+];
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -120,48 +121,52 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
 
-    return Stack(
-      alignment: Alignment.topRight,
-      children: [
-        IconButton(
-          icon: const Icon(
-            Icons.shopping_cart_rounded,
-            color: Colors.white,
-            size: 30,
+    return 
+  Stack(
+  alignment: Alignment.topRight,
+  children: [
+    IconButton(
+      icon: const Icon(
+        Icons.shopping_cart_rounded,
+        color: Colors.white,
+        size: 30,
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const CartScreen()),
+        );
+      },
+    ),
+    if (cartItemCount > 0)
+      Positioned(
+        right: isArabic(context) ? null : 8,
+        left: isArabic(context) ? 8 : null,
+        top: 8,
+        child: Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(10),
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CartScreen()),
-            );
-          },
-        ),
-        if (cartItemCount > 0)
-          Positioned(
-            right: 8,
-            top: 8,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
-              child: Text(
-                cartItemCount > 99 ? '99+' : '$cartItemCount',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
-                textAlign: TextAlign.center,
-              ),
+          constraints: const BoxConstraints(
+            minWidth: 16,
+            minHeight: 16,
+          ),
+          child: Text(
+            cartItemCount > 99 ? '99+' : '$cartItemCount',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
             ),
+            textAlign: TextAlign.center,
           ),
-      ],
-    );
+        ),
+      ),
+  ],
+);
+
+ 
   },
 ),
 
@@ -199,3 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+bool isArabic(BuildContext context) {
+  final locale = Localizations.localeOf(context);
+  return locale.languageCode == 'ar';
+}
+

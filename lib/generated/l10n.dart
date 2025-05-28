@@ -603,6 +603,354 @@ class S {
       args: [error],
     );
   }
+
+  /// `Confirm Checkout`
+  String get confirmcheckout {
+    return Intl.message(
+      'Confirm Checkout',
+      name: 'confirmcheckout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your Cart is empty!`
+  String get cartEmpty {
+    return Intl.message(
+      'Your Cart is empty!',
+      name: 'cartEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go Shopping`
+  String get goShopping {
+    return Intl.message('Go Shopping', name: 'goShopping', desc: '', args: []);
+  }
+
+  /// `Proceed to Checkout`
+  String get ProceedtoCheckout {
+    return Intl.message(
+      'Proceed to Checkout',
+      name: 'ProceedtoCheckout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove`
+  String get Remove {
+    return Intl.message('Remove', name: 'Remove', desc: '', args: []);
+  }
+
+  /// `Cart`
+  String get Cart {
+    return Intl.message('Cart', name: 'Cart', desc: '', args: []);
+  }
+
+  /// `Course removed from wishlist`
+  String get Courseremoved {
+    return Intl.message(
+      'Course removed from wishlist',
+      name: 'Courseremoved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wishlist`
+  String get Wishlist {
+    return Intl.message('Wishlist', name: 'Wishlist', desc: '', args: []);
+  }
+
+  /// `Your wishlist is empty`
+  String get Yourwishlistisempty {
+    return Intl.message(
+      'Your wishlist is empty',
+      name: 'Yourwishlistisempty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Courses you save to your wishlist will appear here`
+  String get Coursesyousavetoyourwishlistwillappearhere {
+    return Intl.message(
+      'Courses you save to your wishlist will appear here',
+      name: 'Coursesyousavetoyourwishlistwillappearhere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Browse Courses`
+  String get BrowseCourses {
+    return Intl.message(
+      'Browse Courses',
+      name: 'BrowseCourses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `My Courses`
+  String get MyCourses {
+    return Intl.message('My Courses', name: 'MyCourses', desc: '', args: []);
+  }
+
+  /// `What will you learn first?`
+  String get whatToLearn {
+    return Intl.message(
+      'What will you learn first?',
+      name: 'whatToLearn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your courses will go here.`
+  String get yourCourses {
+    return Intl.message(
+      'Your courses will go here.',
+      name: 'yourCourses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing's downloaded yet`
+  String get nothingDownloaded {
+    return Intl.message(
+      'Nothing\'s downloaded yet',
+      name: 'nothingDownloaded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When you download a course to take with you, you'll see them here!`
+  String get downloadMessage {
+    return Intl.message(
+      'When you download a course to take with you, you\'ll see them here!',
+      name: 'downloadMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Completed`
+  String get Completed {
+    return Intl.message('Completed', name: 'Completed', desc: '', args: []);
+  }
+
+  /// `No matching courses found`
+  String get NoMatchingcourses {
+    return Intl.message(
+      'No matching courses found',
+      name: 'NoMatchingcourses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All`
+  String get all {
+    return Intl.message('All', name: 'all', desc: '', args: []);
+  }
+
+  /// `Downloaded`
+  String get downloaded {
+    return Intl.message('Downloaded', name: 'downloaded', desc: '', args: []);
+  }
+
+  /// `Archived`
+  String get archived {
+    return Intl.message('Archived', name: 'archived', desc: '', args: []);
+  }
+
+  /// `Favourited`
+  String get favourited {
+    return Intl.message('Favourited', name: 'favourited', desc: '', args: []);
+  }
+
+  /// `Welcome`
+  String get Welcome {
+    return Intl.message('Welcome', name: 'Welcome', desc: '', args: []);
+  }
+
+  /// `Categories`
+  String get Categories {
+    return Intl.message('Categories', name: 'Categories', desc: '', args: []);
+  }
+
+  /// `New Courses`
+  String get NewCourses {
+    return Intl.message('New Courses', name: 'NewCourses', desc: '', args: []);
+  }
+
+  /// `Featured courses in Web Development`
+  String get FeaturescoursesinWebDevelopment {
+    return Intl.message(
+      'Featured courses in Web Development',
+      name: 'FeaturescoursesinWebDevelopment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checkout`
+  String get Checkout {
+    return Intl.message('Checkout', name: 'Checkout', desc: '', args: []);
+  }
+
+  /// `Order Summary`
+  String get OrderSummary {
+    return Intl.message(
+      'Order Summary',
+      name: 'OrderSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Original Price:`
+  String get OriginalPrice {
+    return Intl.message(
+      'Original Price:',
+      name: 'OriginalPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Feature`
+  String get feature {
+    return Intl.message('Feature', name: 'feature', desc: '', args: []);
+  }
+
+  /// `Search`
+  String get search {
+    return Intl.message('Search', name: 'search', desc: '', args: []);
+  }
+
+  /// `Learning`
+  String get learning {
+    return Intl.message('Learning', name: 'learning', desc: '', args: []);
+  }
+
+  /// `Wishlist`
+  String get wishlist {
+    return Intl.message('Wishlist', name: 'wishlist', desc: '', args: []);
+  }
+
+  /// `Account`
+  String get account {
+    return Intl.message('Account', name: 'account', desc: '', args: []);
+  }
+
+  /// `Top Rated Courses`
+  String get TopRatedCourses {
+    return Intl.message(
+      'Top Rated Courses',
+      name: 'TopRatedCourses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No courses found`
+  String get Nocoursesfound {
+    return Intl.message(
+      'No courses found',
+      name: 'Nocoursesfound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Powered by PayPal`
+  String get PoweredbyPayPal {
+    return Intl.message(
+      'Powered by PayPal',
+      name: 'PoweredbyPayPal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PayPal`
+  String get PayPal {
+    return Intl.message('PayPal', name: 'PayPal', desc: '', args: []);
+  }
+
+  /// `Cancelled`
+  String get Cancelled {
+    return Intl.message('Cancelled', name: 'Cancelled', desc: '', args: []);
+  }
+
+  /// `Payment was cancelled by user`
+  String get Paymentwascancelledbyuser {
+    return Intl.message(
+      'Payment was cancelled by user',
+      name: 'Paymentwascancelledbyuser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Payment was not completed`
+  String get Paymentwasnotcompleted {
+    return Intl.message(
+      'Payment was not completed',
+      name: 'Paymentwasnotcompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed`
+  String get Failed {
+    return Intl.message('Failed', name: 'Failed', desc: '', args: []);
+  }
+
+  /// `Payment successful but failed to update enrollments`
+  String get Paymentsuccessfulbutfailedtoupdateenrollments {
+    return Intl.message(
+      'Payment successful but failed to update enrollments',
+      name: 'Paymentsuccessfulbutfailedtoupdateenrollments',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Success`
+  String get Success {
+    return Intl.message('Success', name: 'Success', desc: '', args: []);
+  }
+
+  /// `Payment Method`
+  String get PaymentMethod {
+    return Intl.message(
+      'Payment Method',
+      name: 'PaymentMethod',
+      desc: '',
+      args: [],
+    );
+  }
+
+  // skipped getter for the 'Discounts(0%)' key
+
+  /// `Payment successful: {amount} from {email}\nEnrollments updated successfully`
+  String paymentSuccess(Object amount, Object email) {
+    return Intl.message(
+      'Payment successful: $amount from $email\\nEnrollments updated successfully',
+      name: 'paymentSuccess',
+      desc:
+          'Message shown when payment is successful, including amount and email',
+      args: [amount, email],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

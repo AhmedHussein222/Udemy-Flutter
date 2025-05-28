@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/customcard/coursesCard.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 class TopRatedCourses extends StatelessWidget {
   const TopRatedCourses({super.key});
@@ -11,8 +12,8 @@ class TopRatedCourses extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Top Rated Courses",
+         Text(
+       S.of(context).TopRatedCourses,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,

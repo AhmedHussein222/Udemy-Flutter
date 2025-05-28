@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -57,7 +58,7 @@ class CartScreen extends StatelessWidget {
       return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          title: const Text("Cart", style: TextStyle(color: Colors.white)),
+          title:  Text(S.of(context).Cart, style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.black,
         ),
         body: const Center(
@@ -76,7 +77,7 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text("My Cart", style: TextStyle(color: Colors.white)),
+        title:  Text  (S.of(context).Cart, style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -95,15 +96,14 @@ class CartScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Your Cart is empty!",
-
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                 Text(
+  S.of(context).cartEmpty,
+  style: TextStyle(
+    fontSize: 20,
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+  ),
+),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed:
@@ -121,11 +121,12 @@ class CartScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Go Shopping',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
+                    child: Text(
+    S.of(context).goShopping,
+    style: TextStyle(fontSize: 16, color: Colors.white),
+  ),
+),
+                  
                 ],
               ),
             );
@@ -159,11 +160,11 @@ class CartScreen extends StatelessWidget {
                     ),
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Row(
+                  child:  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Proceed to Checkout',
+                    S.of(context).ProceedtoCheckout,
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.white,
@@ -303,8 +304,8 @@ class CartScreen extends StatelessWidget {
                                           ]),
                                         });
                                       },
-                                      child: const Text(
-                                        'Remove',
+                                      child:  Text(
+                                       S.of(context).Remove,
                                         style: TextStyle(
                                           color: Colors.purple,
                                           fontSize: 12,

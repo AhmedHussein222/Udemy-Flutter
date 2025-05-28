@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:udemyflutter/Screens/subcategories/SubCategories.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 import '../../services/enrollment_service.dart';
 import '../course_content/course_content_screen.dart';
@@ -78,12 +79,12 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            const Padding(
+             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "My Courses",
+                 S.of(context).MyCourses,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -97,12 +98,13 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: [
-                  buildTab("All"),
-                  buildTab("Downloaded"),
-                  buildTab("Archived"),
-                  buildTab("Favourited"),
-                ],
+           children: [
+  buildTab(S.of(context).all),
+  buildTab(S.of(context).downloaded),
+  buildTab(S.of(context).archived),
+  buildTab(S.of(context).favourited),
+],
+
               ),
             ),
             const SizedBox(height: 20),
@@ -123,22 +125,23 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                const Text(
-                                  "What will you learn first?",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  "Your courses will go here.",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14,
-                                  ),
-                                ),
+                               Text(
+  S.of(context)!.whatToLearn,
+  style: TextStyle(
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+  ),
+),
+const SizedBox(height: 10),
+Text(
+  S.of(context)!.yourCourses,
+  style: TextStyle(
+    color: Colors.white70,
+    fontSize: 14,
+  ),
+),
+
                                 const SizedBox(height: 30),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 16),
@@ -212,7 +215,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
     if (selectedTab == "Downloaded") {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children:  [
           SizedBox(height: 60),
           Icon(
             Icons.download_for_offline_outlined,
@@ -220,29 +223,31 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
             size: 60,
           ),
           SizedBox(height: 20),
-          Text(
-            "Nothings downloaded yet",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 10),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              "When you download a course to take with you, you'll see them here!",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ),
+        Text(
+  S.of(context).nothingDownloaded,
+  style: TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+  ),
+),
+SizedBox(height: 10),
+Padding(
+  padding: EdgeInsets.symmetric(horizontal: 24),
+  child: Text(
+    S.of(context).downloadMessage,
+    textAlign: TextAlign.center,
+    style: TextStyle(color: Colors.white70, fontSize: 14),
+  ),
+),
+
+        
         ],
       );
     } else {
-      return const Center(
+      return  Center(
         child: Text(
-          "No Matching courses",
+       S.of(context).NoMatchingcourses,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -360,8 +365,8 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                         ],
                       )
                     else if (progress == 100)
-                      const Text(
-                        'Completed',
+                       Text(
+                    S.of(context).Completed,
                         style: TextStyle(
                           color: Colors.green,
                           fontSize: 12,

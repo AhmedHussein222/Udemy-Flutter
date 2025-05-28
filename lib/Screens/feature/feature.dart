@@ -5,6 +5,7 @@ import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/Screens/subcategories/SubCategories.dart';
 import 'package:udemyflutter/customcard/coursesCard.dart';
 import 'package:udemyflutter/customcategory/custombutton.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 import 'package:udemyflutter/recommendcourse/rating.dart';
 
 class FeatureScreen extends StatelessWidget {
@@ -103,8 +104,8 @@ class FeatureScreen extends StatelessWidget {
             const SizedBox(height: 20),
             const TopRatedCourses(),
             const SizedBox(height: 20),
-            const Text(
-              "Features courses in Web Development",
+         Text(
+              S.of(context).FeaturescoursesinWebDevelopment,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 10),
@@ -213,8 +214,8 @@ class FeatureScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 20),
-            const Text(
-              "New Courses",
+             Text(
+          S.of(context).NewCourses,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 12),
@@ -455,7 +456,7 @@ class FeatureScreen extends StatelessWidget {
        
            SizedBox(height: 20),
         Text(
-             "Categories",
+         S.of(context).Categories,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
             ),
 

@@ -3,19 +3,28 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:udemyflutter/LocaleProvider.dart';
 import 'package:udemyflutter/Screens/checkout/checkout_page.dart';
 import 'package:udemyflutter/Screens/feature/feature.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
-import 'package:udemyflutter/Screens/course_content/course_content_screen.dart';
+// import 'package:udemyflutter/Screens/course_content/course_content_screen.dart';
 import 'package:udemyflutter/generated/l10n.dart';
 import 'firebase_options.dart';
+import 'package:provider/provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+runApp(
+    ChangeNotifierProvider(
+      create: (_) => LocaleProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -23,11 +32,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+      final provider = Provider.of<LocaleProvider>(context);
     return MaterialApp(
       title: 'Udemy-App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      locale: Locale('en'),
+      locale: provider.locale,
+//       builder: (context, child) {
+//   return Directionality(
+//     textDirection: Localizations.localeOf(context).languageCode == 'ar'
+//         ? TextDirection.rtl
+//         : TextDirection.ltr,
+//     child: child!,
+//   );
+// },
+
       localizationsDelegates: [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -75,6 +94,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-bool isArabic() {
-  return Intl.getCurrentLocale() == 'ar';
-}
+// bool isArabic() {
+//   return Intl.getCurrentLocale() == 'ar';
+// }
