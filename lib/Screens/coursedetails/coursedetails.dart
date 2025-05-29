@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/cart/cart_screen.dart';
+import 'package:udemyflutter/services/enrollment_service.dart';
 import 'package:udemyflutter/services/wishlist_service.dart';
 
 class CourseDetailsScreen extends StatefulWidget {
@@ -17,6 +17,8 @@ class CourseDetailsScreen extends StatefulWidget {
 class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   late Future<DocumentSnapshot> instructorFuture;
   final WishlistService _wishlistService = WishlistService();
+   final   EnrollmentService enrollmentService = EnrollmentService();
+
   bool _isInWishlist = false;
   bool _checkingWishlist = true;
 
@@ -93,11 +95,27 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       );
     }
   }
+  // ignore: non_constant_identifier_names
+  Future <void> enroll_cart_btn() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _showSnackBar('Please login first');
+      return;
+    }
+    final userId = user.uid;
+    final price = widget.courseData['price'] ?? 0;
 
+    if(price > 0){
+      await _addToCart();
+    }else{
+      await enrollmentService.enrollCourse( userId: userId, course:widget.courseData);
+       _showSnackBar('Course enrolled successfully', Colors.green);
+    }
+  }
   Future<void> _addToCart() async {
     try {
       final course = widget.courseData;
-      final courseId = course['course_id']?.toString();
+      final courseId = course['course_id']?.toString() ?? course['id'];
 
       if (courseId == null || courseId.isEmpty) {
         if (mounted) {
@@ -171,7 +189,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       ).showSnackBar(const SnackBar(content: Text('Something went wrong')));
     }
   }
-
+  
   Widget _buildStarRating(double rating) {
     return Row(
       children: List.generate(5, (index) {
@@ -342,12 +360,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                CustomButton(
-                  text: "Buy Now",
-                  color: Colors.purple,
-                  textColor: Colors.white,
-                  onPressed: () {},
-                ),
+      
+                
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -399,16 +413,16 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextButton(
-                        onPressed: _addToCart,
+                        onPressed:  enroll_cart_btn,
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.black,
                           side: const BorderSide(color: Colors.white),
                           shape: RoundedRectangleBorder(),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text(
-                          "Add to Cart",
-                          style: TextStyle(color: Colors.white),
+                        child: Text(
+                         price == 0 ? 'Enroll' : "Add to Cart",
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
@@ -521,3 +535,5 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     );
   }
 }
+
+
