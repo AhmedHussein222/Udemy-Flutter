@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 
 class SubCategoryPage extends StatefulWidget {
   const SubCategoryPage({super.key});
@@ -187,13 +188,9 @@ class _SubCategoryPageState extends State<SubCategoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: const Text('Subcategory Courses'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
+     
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding:  EdgeInsets.fromLTRB(15, 50, 15, 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -222,9 +219,9 @@ class _SubCategoryPageState extends State<SubCategoryPage> {
                 ? const Center(child: CircularProgressIndicator(color: Colors.white))
                 : Expanded(
                     child: courses.isEmpty
-                        ? const Center(
+                        ?  Center(
                             child: Text(
-                              'No courses found',
+                          S.of(context).Nocoursesfound,
                               style: TextStyle(color: Colors.white70),
                             ),
                           )

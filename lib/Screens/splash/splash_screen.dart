@@ -48,8 +48,8 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final titles = [
       S.of(context).splash1,
-      S.of(context).splash2, // ضيفيها في ملف l10n.arb و en.arb
-      S.of(context).splash3, // كذلك
+      S.of(context).splash2, 
+      S.of(context).splash3, 
     ];
 
     final subtitles = [

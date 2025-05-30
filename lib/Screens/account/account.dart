@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:udemyflutter/LocaleProvider.dart';
 import 'package:udemyflutter/Screens/login/login.dart';
 import 'package:udemyflutter/Screens/splash/splash_screen.dart';
 import 'package:image_picker/image_picker.dart';
@@ -397,6 +399,29 @@ Widget buildSectionContent() {
         ),
       );
 
+    case 'switch_language':
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      TextButton(
+        onPressed: () {
+          Provider.of<LocaleProvider>(context, listen: false)
+              .setLocale(const Locale('en'));
+        },
+        child: const Text("English"),
+      ),
+      TextButton(
+        onPressed: () {
+          Provider.of<LocaleProvider>(context, listen: false)
+              .setLocale(const Locale('ar'));
+        },
+        child: const Text("العربية"),
+      ),
+    ],
+  ),
+    );
     case 'profile':
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -744,6 +769,8 @@ Widget buildSectionContent() {
         ),
       );
 
+   
+   
     default:
       return const SizedBox.shrink();
   }
@@ -787,19 +814,49 @@ Widget buildDrawer() {
         buildDrawerTile(
             Icons.delete_forever, S.of(context).deleteAccount, 'delete_account',
             color: Colors.red),
-        ListTile(
-          leading: const Icon(Icons.language, color: Colors.white),
-          title: Text(
-            S.of(context).switchLanguage,
-            style: const TextStyle(color: Colors.white),
-          ),
-          hoverColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          onTap: () {
-            Navigator.pop(context);
-            _switchLanguage(context);
-          },
+      ListTile(
+  leading: const Icon(Icons.language, color: Colors.white),
+  title: Text(
+    S.of(context).switchLanguage,
+    style: const TextStyle(color: Colors.white),
+  ),
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          S.of(context).switchLanguage,
+          style: const TextStyle(color: Colors.white),
         ),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () {
+                Provider.of<LocaleProvider>(context, listen: false)
+                    .setLocale(const Locale('en'));
+                Navigator.pop(context);
+              },
+              child: const Text("English"),
+            ),
+            TextButton(
+              onPressed: () {
+                Provider.of<LocaleProvider>(context, listen: false)
+                    .setLocale(const Locale('ar'));
+                Navigator.pop(context); 
+              },
+              child: const Text("العربية"),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+  hoverColor: Colors.transparent,
+  splashColor: Colors.transparent,
+),
+
         ListTile(
           leading: const Icon(Icons.logout, color: Colors.red),
           title: Text(
@@ -862,14 +919,14 @@ Widget buildDrawer() {
     _youtubeController.dispose();
     _instagramController.dispose();
     super.dispose();
-  }
+  }}
 
-  void _switchLanguage(BuildContext context) {
-  final currentLocale = Localizations.localeOf(context);
-  final newLocale = currentLocale.languageCode == 'en'
-      ? const Locale('ar')
-      : const Locale('en');
+//   void _switchLanguage(BuildContext context) {
+//   final currentLocale = Localizations.localeOf(context);
+//   final newLocale = currentLocale.languageCode == 'en'
+//       ? const Locale('ar')
+//       : const Locale('en');
 
-  setState(() {
-  });
-}}
+//   setState(() {
+//   });
+// }}

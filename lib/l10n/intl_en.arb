@@ -64,6 +64,64 @@
   "pickImage": "Pick Image",
   "upload": "Upload",
   "switchLanguage": "Switch Language",
-  "errorDeletingAccount": "Error deleting account: {error}"
+  "errorDeletingAccount": "Error deleting account: {error}",
+  "confirmcheckout": "Confirm Checkout",
+    "cartEmpty": "Your Cart is empty!",
+  "goShopping": "Go Shopping",
+  "ProceedtoCheckout": "Proceed to Checkout",
+  "Remove": "Remove",
+  "Cart": "Cart",
+  "Courseremoved": "Course removed from wishlist",
+  "Wishlist": "Wishlist",
+  "Yourwishlistisempty": "Your wishlist is empty",
+  "Coursesyousavetoyourwishlistwillappearhere": "Courses you save to your wishlist will appear here",
+  "BrowseCourses": "Browse Courses",
+  "MyCourses": "My Courses",
+    "whatToLearn": "What will you learn first?",
+  "yourCourses": "Your courses will go here.",
+    "nothingDownloaded": "Nothing's downloaded yet",
+  "downloadMessage": "When you download a course to take with you, you'll see them here!",
+  "Completed": "Completed",
+  "NoMatchingcourses": "No matching courses found",
+    "all": "All",
+  "downloaded": "Downloaded",
+  "archived": "Archived",
+  "favourited": "Favourited",
+  "Welcome": "Welcome",
+  "Categories": "Categories",
+  "NewCourses": "New Courses",
+  "FeaturescoursesinWebDevelopment": "Featured courses in Web Development",
+  "Checkout": "Checkout",
+  "OrderSummary": "Order Summary",
+  "OriginalPrice": "Original Price:",
+    "feature": "Feature",
+  "search": "Search",
+  "learning": "Learning",
+  "wishlist": "Wishlist",
+  "account": "Account",
+  "TopRatedCourses": "Top Rated Courses",
+  "Nocoursesfound": "No courses found",
+  "PoweredbyPayPal": "Powered by PayPal",
+  "PayPal": "PayPal",
+  "Cancelled": "Cancelled",
+  "Paymentwascancelledbyuser": "Payment was cancelled by user",
+  "Paymentwasnotcompleted": "Payment was not completed",
+  "Failed": "Failed",
+  "Paymentsuccessfulbutfailedtoupdateenrollments": "Payment successful but failed to update enrollments",
+  "Success": "Success",
+  "PaymentMethod": "Payment Method",
+  "Discounts(0%)": "Discounts (0%)",
+    "paymentSuccess": "Payment successful: {amount} from {email}\\nEnrollments updated successfully",
+  "@paymentSuccess": {
+    "description": "Message shown when payment is successful, including amount and email",
+    "placeholders": {
+      "amount": {},
+      "email": {}
+    }
+  }
+
+
+
+
   
 }

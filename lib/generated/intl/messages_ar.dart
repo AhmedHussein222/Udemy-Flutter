@@ -32,9 +32,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m5(error) => "خطأ في تحديث كلمة المرور: ${error}";
 
+  static String m6(amount, email) =>
+      "Payment successful: ${amount} from ${email}\\nEnrollments updated successfully";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "BrowseCourses": MessageLookupByLibrary.simpleMessage("تصفح الدورات"),
+    "Cancelled": MessageLookupByLibrary.simpleMessage("تم الإلغاء"),
+    "Cart": MessageLookupByLibrary.simpleMessage("السلة"),
+    "Categories": MessageLookupByLibrary.simpleMessage("الفئات"),
+    "Checkout": MessageLookupByLibrary.simpleMessage("الدفع"),
+    "Completed": MessageLookupByLibrary.simpleMessage("مكتمل"),
+    "Courseremoved": MessageLookupByLibrary.simpleMessage(
+      "تمت إزالة الدورة من قائمة المفضلة",
+    ),
+    "Coursesyousavetoyourwishlistwillappearhere":
+        MessageLookupByLibrary.simpleMessage(
+          "الدورات التي تحفظها في قائمة المفضلة ستظهر هنا",
+        ),
     "Email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
+    "Failed": MessageLookupByLibrary.simpleMessage("فشل"),
+    "FeaturescoursesinWebDevelopment": MessageLookupByLibrary.simpleMessage(
+      "دورات مميزة في تطوير الويب",
+    ),
     "Haveaccount": MessageLookupByLibrary.simpleMessage("ليس لديك حساب؟"),
     "Login": MessageLookupByLibrary.simpleMessage("تسجيل الدخول"),
     "Loginemail": MessageLookupByLibrary.simpleMessage(
@@ -43,14 +63,54 @@ class MessageLookup extends MessageLookupByLibrary {
     "Loginsuccessful": MessageLookupByLibrary.simpleMessage(
       "تم تسجيل الدخول بنجاح!",
     ),
+    "MyCourses": MessageLookupByLibrary.simpleMessage("دوراتي"),
+    "NewCourses": MessageLookupByLibrary.simpleMessage("دورات جديدة"),
+    "NoMatchingcourses": MessageLookupByLibrary.simpleMessage(
+      "لا توجد دورات مطابقة",
+    ),
+    "Nocoursesfound": MessageLookupByLibrary.simpleMessage(
+      "لا توجد دورات متاحة",
+    ),
+    "OrderSummary": MessageLookupByLibrary.simpleMessage("ملخص الطلب"),
+    "OriginalPrice": MessageLookupByLibrary.simpleMessage(":السعر الأصلي"),
     "Password": MessageLookupByLibrary.simpleMessage("كلمة المرور"),
+    "PayPal": MessageLookupByLibrary.simpleMessage("باي بال"),
+    "PaymentMethod": MessageLookupByLibrary.simpleMessage("طريقة الدفع"),
+    "Paymentsuccessfulbutfailedtoupdateenrollments":
+        MessageLookupByLibrary.simpleMessage(
+          "تم الدفع بنجاح ولكن فشل في تحديث التسجيلات",
+        ),
+    "Paymentwascancelledbyuser": MessageLookupByLibrary.simpleMessage(
+      "تم إلغاء الدفع من قبل المستخدم",
+    ),
+    "Paymentwasnotcompleted": MessageLookupByLibrary.simpleMessage(
+      "لم يتم إكمال الدفع",
+    ),
+    "PoweredbyPayPal": MessageLookupByLibrary.simpleMessage("مدعوم من باي بال"),
+    "ProceedtoCheckout": MessageLookupByLibrary.simpleMessage(
+      "المتابعة إلى الدفع",
+    ),
+    "Remove": MessageLookupByLibrary.simpleMessage("إزالة"),
     "SignUp": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
+    "Success": MessageLookupByLibrary.simpleMessage("نجاح"),
+    "TopRatedCourses": MessageLookupByLibrary.simpleMessage(
+      "الدورات الأعلى تقييمًا",
+    ),
+    "Welcome": MessageLookupByLibrary.simpleMessage("مرحبًا بك"),
+    "Wishlist": MessageLookupByLibrary.simpleMessage("المفضلة"),
+    "Yourwishlistisempty": MessageLookupByLibrary.simpleMessage(
+      "قائمة المفضلة فارغة",
+    ),
+    "account": MessageLookupByLibrary.simpleMessage("الحساب"),
+    "all": MessageLookupByLibrary.simpleMessage("الكل"),
     "alreadyHaveAccount": MessageLookupByLibrary.simpleMessage(
       "هل لديك حساب بالفعل؟",
     ),
+    "archived": MessageLookupByLibrary.simpleMessage("مؤرشف"),
     "bio": MessageLookupByLibrary.simpleMessage("السيرة الذاتية:"),
     "bioField": MessageLookupByLibrary.simpleMessage("السيرة الذاتية"),
     "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
+    "cartEmpty": MessageLookupByLibrary.simpleMessage("سلة التسوق فارغة!"),
     "changePassword": MessageLookupByLibrary.simpleMessage("تغيير كلمة المرور"),
     "changeProfileImage": MessageLookupByLibrary.simpleMessage(
       "تغيير صورة الملف الشخصي",
@@ -58,6 +118,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmPassword": MessageLookupByLibrary.simpleMessage(
       "تأكيد كلمة المرور",
     ),
+    "confirmcheckout": MessageLookupByLibrary.simpleMessage("تأكيد الدفع"),
     "continueText": MessageLookupByLibrary.simpleMessage("متابعة"),
     "currentPassword": MessageLookupByLibrary.simpleMessage(
       "كلمة المرور الحالية",
@@ -73,6 +134,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteAccountDialogTitle": MessageLookupByLibrary.simpleMessage(
       "حذف الحساب",
     ),
+    "downloadMessage": MessageLookupByLibrary.simpleMessage(
+      "عندما تقوم بتنزيل دورة لتأخذها معك، ستظهر هنا!",
+    ),
+    "downloaded": MessageLookupByLibrary.simpleMessage("تم التنزيل"),
     "editProfile": MessageLookupByLibrary.simpleMessage("تعديل الملف الشخصي"),
     "errorDeletingAccount": m0,
     "errorFetchingProfile": m1,
@@ -82,18 +147,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorUpdatingPassword": m5,
     "facebook": MessageLookupByLibrary.simpleMessage("فيسبوك:"),
     "facebookUrl": MessageLookupByLibrary.simpleMessage("رابط فيسبوك"),
+    "favourited": MessageLookupByLibrary.simpleMessage("المفضلة"),
+    "feature": MessageLookupByLibrary.simpleMessage("المميزة"),
     "firstName": MessageLookupByLibrary.simpleMessage("الاسم الأول"),
     "gender": MessageLookupByLibrary.simpleMessage("الجنس"),
+    "goShopping": MessageLookupByLibrary.simpleMessage("تسوق الآن"),
     "home": MessageLookupByLibrary.simpleMessage("الرئيسية"),
     "instagram": MessageLookupByLibrary.simpleMessage("إنستغرام:"),
     "instagramUrl": MessageLookupByLibrary.simpleMessage("رابط إنستغرام"),
     "lastName": MessageLookupByLibrary.simpleMessage("اسم العائلة"),
+    "learning": MessageLookupByLibrary.simpleMessage("التعلّم"),
     "linkedin": MessageLookupByLibrary.simpleMessage("لينكدإن:"),
     "linkedinUrl": MessageLookupByLibrary.simpleMessage("رابط لينكدإن"),
     "logout": MessageLookupByLibrary.simpleMessage("تسجيل الخروج"),
     "newPassword": MessageLookupByLibrary.simpleMessage("كلمة المرور الجديدة"),
     "noBioProvided": MessageLookupByLibrary.simpleMessage(
       "لم يتم تقديم سيرة ذاتية",
+    ),
+    "nothingDownloaded": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد شيء تم تنزيله بعد",
     ),
     "options": MessageLookupByLibrary.simpleMessage(
       "_____ خيارات تسجيل دخول أخرى _____",
@@ -104,6 +176,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "passwordUpdated": MessageLookupByLibrary.simpleMessage(
       "تم تحديث كلمة المرور بنجاح.",
     ),
+    "paymentSuccess": m6,
     "pickImage": MessageLookupByLibrary.simpleMessage("اختر صورة"),
     "profileImageUpdated": MessageLookupByLibrary.simpleMessage(
       "تم تحديث صورة الملف الشخصي.",
@@ -112,6 +185,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "تم حفظ الملف الشخصي بنجاح.",
     ),
     "saveProfile": MessageLookupByLibrary.simpleMessage("حفظ الملف الشخصي"),
+    "search": MessageLookupByLibrary.simpleMessage("بحث"),
     "selectImage": MessageLookupByLibrary.simpleMessage("اختر صورة من المعرض."),
     "selectImageFirst": MessageLookupByLibrary.simpleMessage(
       "يرجى اختيار صورة أولاً.",
@@ -147,6 +221,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "userNotLoggedIn": MessageLookupByLibrary.simpleMessage(
       "المستخدم غير مسجل الدخول.",
+    ),
+    "whatToLearn": MessageLookupByLibrary.simpleMessage(
+      "بماذا ستبدأ التعلم أولًا؟",
+    ),
+    "wishlist": MessageLookupByLibrary.simpleMessage("المفضلة"),
+    "yourCourses": MessageLookupByLibrary.simpleMessage(
+      "ستظهر الدورات التدريبية الخاصة بك هنا.",
     ),
     "youtube": MessageLookupByLibrary.simpleMessage("يوتيوب:"),
     "youtubeUrl": MessageLookupByLibrary.simpleMessage("رابط يوتيوب"),

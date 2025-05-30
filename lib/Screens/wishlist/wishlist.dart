@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/coursedetails/coursedetails.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
+import 'package:udemyflutter/generated/l10n.dart';
 import 'package:udemyflutter/services/wishlist_service.dart';
 
 class WishlistScreen extends StatefulWidget {
@@ -42,8 +43,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
       if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Course removed from wishlist'),
+             SnackBar(
+              content: Text(S.of(context).Courseremoved),
               backgroundColor: Colors.purple,
             ),
           );
@@ -77,8 +78,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
-          'Wishlist',
+        title:  Text(
+       S.of(context).Wishlist,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -182,8 +183,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
           children: [
             const Icon(Icons.favorite_border, size: 80, color: Colors.white70),
             const SizedBox(height: 20),
-            const Text(
-              'Your wishlist is empty',
+             Text(
+             S.of(context).Yourwishlistisempty,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -191,14 +192,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Courses you save to your wishlist will appear here',
+             Text(
+            S.of(context).Coursesyousavetoyourwishlistwillappearhere,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 30),
             CustomButton(
-              text: "Browse Courses",
+              text: S.of(context).BrowseCourses,
               color: Colors.purple,
               textColor: Colors.white,
               onPressed: () {
