@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:udemyflutter/Custombutton/custombuttton.dart';
 import 'package:udemyflutter/Screens/home/homePage.dart';
 import 'package:udemyflutter/Screens/signup/formsignup.dart';
@@ -15,10 +17,63 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn _googleSignIn = GoogleSignIn();
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 // final Locale selectedLocale ;
+Future<void> signInWithGoogle(BuildContext context) async {
+  try {
+    // 1. تسجيل الدخول بجوجل
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) return;
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final UserCredential userCredential = await _auth.signInWithCredential(credential);
+    final User? user = userCredential.user;
+
+    if (user == null) return;
+
+    // 2. التحقق من وجود المستخدم في Firestore
+    final DocumentReference userDocRef = _firestore.collection("Users").doc(user.uid);
+    final DocumentSnapshot userDocSnapshot = await userDocRef.get();
+
+    if (!userDocSnapshot.exists) {
+      // 3. إذا لم يكن موجودًا، نقوم بإنشائه
+      await userDocRef.set({
+        "user_id": user.uid,
+        "first_name": user.displayName ?? "",
+        "email": user.email,
+        "profile_picture": user.photoURL,
+        "created_at": DateTime.now(),
+        "gender": "male",
+        "role": "student"
+      });
+    }
+
+    // 4. التنقل إلى الصفحة الرئيسية
+    Navigator.pushReplacementNamed(context, '/home');
+
+  } catch (e) {
+    // 5. التعامل مع الأخطاء
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login Failed: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    print("Error during Google Sign-In: $e");
+  }
+}
   @override
+  
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
@@ -176,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         _buildSocialButton(
                           'assets/Images/google-logo.png',
-                          () {},
+                          () => signInWithGoogle(context),
                         ),
                         const SizedBox(width: 8),
                         _buildSocialButton('assets/Images/3536394.png', () {}),
