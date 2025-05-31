@@ -126,9 +126,12 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body:
           _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.deepPurple),
+              )
               : !_courseExists
               ? Center(
                 child: Column(
@@ -148,6 +151,9 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                      ),
                       child: const Text('Go Back'),
                     ),
                   ],
@@ -157,11 +163,10 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                 length: 2,
                 child: Column(
                   children: [
-                    // Video at the top
                     if (_errorMessage != null)
                       Container(
                         height: 200,
-                        color: Colors.red[100],
+                        color: Colors.red[900],
                         child: Center(
                           child: Text(
                             _errorMessage!,
@@ -177,11 +182,15 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                     else
                       Container(
                         height: 200,
-                        color: Colors.black12,
-                        child: const Center(child: Text('No video available')),
+                        color: Colors.grey[900],
+                        child: const Center(
+                          child: Text(
+                            'No video available',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                       ),
 
-                    // Course title and description
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: 8.0,
@@ -192,36 +201,40 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                         children: [
                           Text(
                             courseData?['title'] ?? 'No Title',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
+                              color: Colors.white,
                             ),
                           ),
-                     
                         ],
                       ),
                     ),
 
-                    // Tabs
                     TabBar(
-                      tabs: [Tab(text: 'Overview'), Tab(text: 'Lectures')],
+                      labelColor: Colors.deepPurple,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.deepPurple,
+                      tabs: const [
+                        Tab(text: 'Overview'),
+                        Tab(text: 'Lectures'),
+                      ],
                     ),
 
                     Expanded(
                       child: TabBarView(
                         children: [
-                          // Tab 1: Overview
                           SingleChildScrollView(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Course Description
                                 const Text(
                                   'Description',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -230,17 +243,17 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                       'No description available',
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.black87,
+                                    color: Colors.grey,
                                   ),
                                 ),
                                 const SizedBox(height: 24),
 
-                                // What you'll learn
                                 const Text(
                                   "What you'll learn",
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -259,7 +272,7 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                             const Icon(
                                               Icons.check_circle_outline,
                                               size: 20,
-                                              color: Colors.green,
+                                              color: Colors.deepPurple,
                                             ),
                                             const SizedBox(width: 8),
                                             Expanded(
@@ -267,6 +280,7 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                                 item.toString(),
                                                 style: const TextStyle(
                                                   fontSize: 16,
+                                                  color: Colors.grey,
                                                 ),
                                               ),
                                             ),
@@ -276,12 +290,12 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                     ),
                                 const SizedBox(height: 24),
 
-                                // Requirements
                                 const Text(
                                   'Requirements',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -300,6 +314,7 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                             const Icon(
                                               Icons.arrow_right,
                                               size: 20,
+                                              color: Colors.deepPurple,
                                             ),
                                             const SizedBox(width: 8),
                                             Expanded(
@@ -307,6 +322,7 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                                 item.toString(),
                                                 style: const TextStyle(
                                                   fontSize: 16,
+                                                  color: Colors.grey,
                                                 ),
                                               ),
                                             ),
@@ -316,12 +332,12 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                     ),
                                 const SizedBox(height: 24),
 
-                                // Course Details
                                 const Text(
                                   'Course Details',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -348,16 +364,21 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                               ],
                             ),
                           ),
-                          // Tab 2: Lectures
                           ListView.builder(
                             itemCount: lessons.length,
                             itemBuilder: (context, index) {
                               final lesson = lessons[index];
                               final isSelected = selectedLesson == lesson;
                               return Container(
-                                color: isSelected ? Colors.grey[200] : null,
+                                color:
+                                    isSelected
+                                        ? Colors.grey[900]
+                                        : Colors.black,
                                 child: ListTile(
-                                  leading: Icon(Icons.download_rounded),
+                                  leading: const Icon(
+                                    Icons.download_rounded,
+                                    color: Colors.deepPurple,
+                                  ),
                                   title: Text(
                                     lesson['title'] ?? 'No title',
                                     style: TextStyle(
@@ -365,6 +386,7 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                           isSelected
                                               ? FontWeight.bold
                                               : FontWeight.normal,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   subtitle: Text(
@@ -373,8 +395,12 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
                                         : lesson['type'] == 'article'
                                         ? 'Article'
                                         : '',
+                                    style: const TextStyle(color: Colors.grey),
                                   ),
-                                  trailing: Text('${index + 1}'),
+                                  trailing: Text(
+                                    '${index + 1}',
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
                                   onTap: () {
                                     if (lesson['video_url'] != null) {
                                       setState(() {
@@ -402,10 +428,13 @@ class _CourseContentScreenState extends State<CourseContentScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info, size: 20),
+          const Icon(Icons.info, size: 20, color: Colors.deepPurple),
           const SizedBox(width: 8),
           Expanded(
-            child: Text('$label: $value', style: const TextStyle(fontSize: 16)),
+            child: Text(
+              '$label: $value',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           ),
         ],
       ),
