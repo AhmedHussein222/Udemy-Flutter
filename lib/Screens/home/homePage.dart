@@ -1,15 +1,15 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:udemyflutter/LocaleProvider.dart';
 import 'package:udemyflutter/Screens/account/account.dart';
+import 'package:udemyflutter/Screens/cart/cart_screen.dart';
 import 'package:udemyflutter/Screens/feature/feature.dart';
 import 'package:udemyflutter/Screens/mylearning/mylearning.dart';
 import 'package:udemyflutter/Screens/search/search.dart';
 import 'package:udemyflutter/Screens/wishlist/wishlist.dart';
-import 'package:udemyflutter/Screens/cart/cart_screen.dart';
-import 'package:badges/badges.dart' as badges;
 import 'package:udemyflutter/generated/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -54,12 +54,13 @@ class _HomeScreenState extends State<HomeScreen> {
         label: S.of(context).learning,
       ),
       StreamBuilder<DocumentSnapshot>(
-        stream: user != null
-            ? FirebaseFirestore.instance
-                .collection('Wishlists')
-                .doc(user.uid)
-                .snapshots()
-            : Stream<DocumentSnapshot>.empty(),
+        stream:
+            user != null
+                ? FirebaseFirestore.instance
+                    .collection('Wishlists')
+                    .doc(user.uid)
+                    .snapshots()
+                : Stream<DocumentSnapshot>.empty(),
         builder: (context, snapshot) {
           int wishlistItemCount = 0;
           if (snapshot.connectionState == ConnectionState.active &&
@@ -109,12 +110,13 @@ class _HomeScreenState extends State<HomeScreen> {
               right: isArabic ? null : 16, // اليمين لو إنجليزي
               left: isArabic ? 16 : null, // اليسار لو عربي
               child: StreamBuilder<DocumentSnapshot>(
-                stream: user != null
-                    ? FirebaseFirestore.instance
-                        .collection('Carts')
-                        .doc(user.uid)
-                        .snapshots()
-                    : Stream<DocumentSnapshot>.empty(),
+                stream:
+                    user != null
+                        ? FirebaseFirestore.instance
+                            .collection('Carts')
+                            .doc(user.uid)
+                            .snapshots()
+                        : Stream<DocumentSnapshot>.empty(),
                 builder: (context, snapshot) {
                   int cartItemCount = 0;
 
@@ -127,9 +129,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   return Directionality(
-                    textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+                    textDirection:
+                        isArabic ? TextDirection.rtl : TextDirection.ltr,
                     child: Stack(
-                      alignment: isArabic ? Alignment.topLeft : Alignment.topRight,
+                      alignment:
+                          isArabic ? Alignment.topLeft : Alignment.topRight,
                       children: [
                         IconButton(
                           icon: const Icon(
