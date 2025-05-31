@@ -181,4 +181,38 @@ class EnrollmentService {
       return false;
     }
   }
+
+  Future<bool> unenrollCourse({
+    required String userId,
+    required String courseId,
+  }) async {
+    try {
+      final enrollmentRef = _firestore.collection('Enrollments').doc(userId);
+      final enrollmentSnap = await enrollmentRef.get();
+
+      if (!enrollmentSnap.exists) {
+        print("No enrollments found for user");
+        return false;
+      }
+
+      final data = enrollmentSnap.data()!;
+      List<Map<String, dynamic>> courses = List<Map<String, dynamic>>.from(
+        data['courses'] ?? [],
+      );
+
+      // Remove the course from the list
+      courses.removeWhere((course) => course['id'] == courseId);
+
+      // Update the document
+      await enrollmentRef.update({
+        'courses': courses,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      return true;
+    } catch (e) {
+      print('Error unenrolling course: $e');
+      return false;
+    }
+  }
 }
